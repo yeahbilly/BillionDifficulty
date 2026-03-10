@@ -1,5 +1,6 @@
 .hidden/
 lib/*
+!lib/.gitkeep
 assets/old/
 
 ## Ignore Visual Studio temporary files, build results, and
