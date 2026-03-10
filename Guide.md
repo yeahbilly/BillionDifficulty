@@ -28,7 +28,7 @@ Updates the title in the chapter select menu and level end screen
 ### `LeaderboardController.CanSubmitScores`
 Stops the game from submitting any scores achieved on this difficulty
 
-### ~~`StatsManager.SendInfo` / `FinalCyberRank.GameOver`~~
+### ~~`StatsManager.SendInfo`~~ / ~~`FinalCyberRank.GameOver`~~
 (Not required) Used to check that leaderboard scores aren't being submitted
 
 ### `PresenceController.Start`
