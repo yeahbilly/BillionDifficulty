@@ -117,7 +117,7 @@ public class TurretPatch {
 			Vector3 distance = __instance.eid.target.position - __instance.transform.position;
 			// Vector3(0, 24f, 0) + 0.7f *
 			bigProjectileExtraForce = new Vector3(0.9f * distance.x, 16f + 0.75f * distance.y, 0.9f * distance.z);
-			projectile.transform.localScale = new Vector3(2.5f, 2.5f, 2.5f);;
+			projectile.transform.localScale = new Vector3(2.5f, 2.5f, 2.5f);
 			ProjectileHeightExplosion heightExplosion = projectile.AddComponent<ProjectileHeightExplosion>();
 			heightExplosion.maxDistance = 8f;
 			heightExplosion.target = __instance.eid.target;

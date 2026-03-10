@@ -10,7 +10,7 @@ public class EnemyIdentifierHudMessagePatch {
 	// message setup
 	[HarmonyPostfix]
 	[HarmonyPatch(typeof(EnemyIdentifier), nameof(EnemyIdentifier.Start))]
-	public static void StartPostfix(ref EnemyIdentifier __instance) {
+	public static void StartPostfix(EnemyIdentifier __instance) {
 		if (__instance.difficulty != 19) {
 			return;
 		}
@@ -67,7 +67,7 @@ public class EnemyIdentifierHudMessagePatch {
 	// shows message
 	[HarmonyPrefix]
 	[HarmonyPatch(typeof(EnemyIdentifier), nameof(EnemyIdentifier.Update))]
-	public static void UpdatePrefix(ref EnemyIdentifier __instance, ref int ___difficulty) {
+	public static void UpdatePrefix(EnemyIdentifier __instance) {
 		if (__instance.difficulty != 19 || __instance.dead) {
 			return;
 		}

@@ -48,7 +48,7 @@ public class Util {
 }
 
 //[BepInPlugin(MyPluginInfo.PLUGIN_GUID, MyPluginInfo.PLUGIN_NAME, MyPluginInfo.PLUGIN_VERSION)]
-[BepInPlugin("billy.billiondifficulty", "Billion Difficulty", "1.6.0")]
+[BepInPlugin("billy.billiondifficulty", "Billion Difficulty", MyPluginInfo.PLUGIN_VERSION)]
 [BepInProcess("ULTRAKILL.exe")]
 public class Plugin : BaseUnityPlugin {
 	private static readonly Harmony Harmony = new Harmony("billy.billiondifficulty");

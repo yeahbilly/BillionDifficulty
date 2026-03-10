@@ -1,8 +1,5 @@
-using System.Collections;
 using HarmonyLib;
 using UnityEngine;
-using UnityEngine.AI;
-using UnityObject = UnityEngine.Object;
 
 
 namespace BillionDifficulty.EnemyPatches;
@@ -18,6 +15,7 @@ public class GuttermanPatch {
 		}
 		BoolValue bv = __instance.gameObject.AddComponent<BoolValue>();
 		bv.description = "targetInZone";
+		MoveBacker mb = __instance.gameObject.AddComponent<MoveBacker>();
 	}
 	
 	// GUTTERMAN PATCH (speed)

@@ -1,5 +1,7 @@
-## Version ?.?.? (2026-03-??)
-- Fixed some audio sources not working with portals
+## Version 1.6.1 (2026-03-10)
+- Fixed a few audio sources not working with portals
+- *Fix/buff*: Guttermen can now dodge independent of gravity (though they may still be limited by the dimensions of the portal-connected area they're in)
+- Removed a bit of unnecessary code
 
 ## Version 1.6.0 (2026-03-09)
 - Prime sanctums and encores should now unlock properly

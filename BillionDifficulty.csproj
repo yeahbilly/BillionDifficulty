@@ -4,7 +4,7 @@
     <TargetFramework>netstandard2.1</TargetFramework>
     <AssemblyName>BillionDifficulty</AssemblyName>
     <Product>Billion Difficulty</Product>
-    <Version>1.6.0</Version>
+    <Version>1.6.1</Version>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <LangVersion>latest</LangVersion>
     <RestoreAdditionalProjectSources>
@@ -47,9 +47,6 @@
     </Reference>
     <Reference Include="UnityEngine.ResourceManagement">
       <HintPath>lib\Unity.ResourceManager.dll</HintPath>
-    </Reference>
-    <Reference Include="Steamworks">
-      <HintPath>lib\Facepunch.Steamworks.Win64.dll</HintPath>
     </Reference>
   </ItemGroup>
 

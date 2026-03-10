@@ -92,7 +92,7 @@ public class ZombieProjectilesPatch {
 		}
 		// BB
 		/*
-		else if (___eid.enemyType == EnemyType.Soldier) {
+		else if (__instance.eid.enemyType == EnemyType.Soldier) {
 			__instance.projectile = Billion.Projectile;
 		}*/
 	}
@@ -173,34 +173,6 @@ public class ZombieProjectilesPatch {
 			}
 		}
 	}
-	
-	// scrapped schism mortar attack
-	/*[HarmonyPostfix]
-	[HarmonyPatch(typeof(ZombieProjectiles), nameof(ZombieProjectiles.ShootProjectile))]
-	public static void ShootPostfix(ref ZombieProjectiles __instance, ref GameObject ___currentProjectile, ref int ___difficulty, ref EnemyIdentifier ___eid) {
-		if (___difficulty == 19) {
-			if (___eid.enemyType == EnemyType.Schism) {
-				___currentProjectile.transform.localScale = new Vector3(1, 1, 1); // default: 2, 2, 2
-				Projectile projectileComp = ___currentProjectile.GetComponent<Projectile>();
-				projectileComp.explosionEffect.transform.localScale = new Vector3(3, 3, 3); // default: 12, 12, 12
-
-				__instance.projectileBeam = null;
-				projectileComp.damage = 30; // default: 60
-				projectileComp.predictiveHomingMultiplier = 0.75f; // default: 0
-				projectileComp.bigExplosion = false;
-
-				Rigidbody projectileRigidbody = ___currentProjectile.GetComponent<Rigidbody>();
-				projectileRigidbody.drag = -2.65f; // default: 0
-
-				//___currentProjectile.GetComponent<Rigidbody>().AddForce(new Vector3(0, 12, 0));
-				AddForce forceComp = ___currentProjectile.AddComponent<AddForce>();
-				forceComp.onEnable = true;
-				forceComp.force = new Vector3(0, 12, 0);
-				___currentProjectile.SetActive(false);
-				___currentProjectile.SetActive(true);
-			}
-		}
-	}*/
 	
 	// SCHISM PATCH (attack)
 	[HarmonyPostfix]
@@ -397,8 +369,8 @@ public class ZombieMeleePatch {
 	// FILTH PATCH (JUMP FORCE)
 	[HarmonyPrefix]
 	[HarmonyPatch(typeof(ZombieMelee), nameof(ZombieMelee.JumpStart))]
-	public static bool JumpPrefix(ZombieMelee __instance, int ___difficulty, EnemyIdentifier ___eid) {
-		if (___difficulty != 19) {
+	public static bool JumpPrefix(ZombieMelee __instance) {
+		if (__instance.difficulty != 19) {
 			return true;
 		}
 

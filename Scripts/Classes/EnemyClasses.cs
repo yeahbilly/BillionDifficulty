@@ -260,14 +260,12 @@ class FerrymanStuff : MonoBehaviour {
 }
 
 public class MoveBacker : MonoBehaviour {
-	Transform t;
 	Rigidbody rb;
 	NavMeshAgent nma;
 	EnemyIdentifier eid;
 	float strength = 150f;
 	public bool moving = false;
 	public void Start() {
-		t = this.transform;
 		rb = this.GetComponent<Rigidbody>();
 		nma = this.GetComponent<NavMeshAgent>();
 		eid = this.GetComponent<EnemyIdentifier>();
@@ -285,10 +283,11 @@ public class MoveBacker : MonoBehaviour {
 		}
 
 		Vector3 target = (eid.target == null) ? NewMovement.Instance.transform.position : eid.target.position;
-		Vector3 forward = target - t.position;
+		Vector3 forward = target - this.transform.position;
 		forward.y = 0f;
 		forward.Normalize();
-		Vector3 targetPosition = t.position - 15f * forward;
+
+		Vector3 targetPosition = this.transform.position - 15f * forward;
 
 		NavMeshHit hit;
 		LayerMask groundLayer = LayerMask.GetMask("Outdoors", "OutdoorsBaked", "Environment", "EnvironmentBaked");
@@ -301,8 +300,8 @@ public class MoveBacker : MonoBehaviour {
 		}
 
 		// checks if floor exists below the navmesh position
-		Vector3 rayOrigin = hit.position + Vector3.up * 0.1f; // slightly above to avoid self-collision
-		if (!Physics.Raycast(rayOrigin, Vector3.down, groundCheckDistance, groundLayer)) {
+		Vector3 rayOrigin = hit.position + this.transform.up * 0.1f; // slightly above to avoid self-collision
+		if (!Physics.Raycast(rayOrigin, -1f * this.transform.up, groundCheckDistance, groundLayer)) {
 			moving = false;
 			yield break;
 		}

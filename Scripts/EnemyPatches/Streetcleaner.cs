@@ -1,6 +1,5 @@
 using HarmonyLib;
 using UnityEngine;
-using UnityObject = UnityEngine.Object;
 
 
 namespace BillionDifficulty.EnemyPatches;

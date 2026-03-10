@@ -1,7 +1,6 @@
 using Billion = BillionDifficulty.Plugin;
 using BillionDifficulty.EnemyPatches;
 using System;
-using System.Collections.Generic;
 using HarmonyLib;
 using UnityEngine;
 using UnityObject = UnityEngine.Object;
@@ -181,9 +180,9 @@ public class EndlessGridPatch {
 public class StyleHUDPatch {
 	[HarmonyPostfix]
 	[HarmonyPatch(typeof(StyleHUD), nameof(StyleHUD.Start))]
-	public static void StartPostfix(Dictionary<string, string> ___idNameDict) {
-		if (!___idNameDict.ContainsKey("billion.blue")) {
-			___idNameDict.Add("billion.blue", "<color=#00ffffff>I'M BLUE</color>");
+	public static void StartPostfix(StyleHUD __instance) {
+		if (!__instance.idNameDict.ContainsKey("billion.blue")) {
+			__instance.idNameDict.Add("billion.blue", "<color=#00ffffff>I'M BLUE</color>");
 		}
 	}
 }
