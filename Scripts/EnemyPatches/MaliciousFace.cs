@@ -4,6 +4,8 @@ using ULTRAKILL.Portal;
 using HarmonyLib;
 using UnityEngine;
 using UnityObject = UnityEngine.Object;
+using UnityEngine.AI;
+using System;
 
 
 namespace BillionDifficulty.EnemyPatches;
@@ -11,13 +13,35 @@ namespace BillionDifficulty.EnemyPatches;
 // !!! PATCHGROUP: MALICIOUSFACE !!!
 [HarmonyPatch(typeof(MaliciousFace))]
 public class MaliciousFacePatch {
+	// MAURICE PATCH (burst number and cooldown)
+	[HarmonyPostfix]
+	[HarmonyPatch(typeof(MaliciousFace), nameof(MaliciousFace.Start))]
+	public static void StartPostfix(MaliciousFace __instance) {
+		if (__instance.difficulty != 19)
+			return;
+		
+		float hardModeMult = (!Util.IsHardMode()) ? 1f : 1.1f;
+		__instance.coolDownMultiplier = 1.5f * hardModeMult; // Brutal: 1.25f
+		__instance.maxBurst = 18; // Brutal: 10
+
+		if (!Util.IsHardMode())
+			return;
+
+		// int hammerIndex = Array.IndexOf(__instance.eid.weaknesses, "hammer");
+		// if (hammerIndex != -1) {
+		// 	__instance.eid.weaknessMultipliers[hammerIndex] = 0.6f; // default: 1.5f
+		// }
+		Plugin.SetEnemyWeakness("hammer", 0.6f, __instance.eid); // default: 1.5f
+	}
+
 	// MAURICE PATCH (explosion parry and projectile damage reduction)
 	[HarmonyPrefix]
 	[HarmonyPatch(typeof(MaliciousFace), nameof(MaliciousFace.OnParry))]
 	public static bool OnParryPrefix(ref DamageData data, bool isShotgun, MaliciousFace __instance) {
-		if (!__instance.spiderParryable) {
+		if (__instance.difficulty != 19)
+			return true;
+		if (!__instance.spiderParryable)
 			return false;
-		}
 
 		__instance.spiderParryable = false;
 		MonoSingleton<FistControl>.Instance.currentPunch.Parry(false, __instance.eid, "");
@@ -53,23 +77,109 @@ public class MaliciousFacePatch {
 		return false;
 	}
 
-
-	// MAURICE PATCH (burst number and cooldown)
+	// MAURICE PATCH (more beam)
 	[HarmonyPostfix]
-	[HarmonyPatch(typeof(MaliciousFace), nameof(MaliciousFace.Start))]
-	public static void StartPostfix(MaliciousFace __instance) {
-		if (__instance.difficulty != 19) {
+	[HarmonyPatch(typeof(MaliciousFace), nameof(MaliciousFace.AttackCheck))]
+	public static void AttackCheckPostfix(TargetData targetData, MaliciousFace __instance) {
+		if (!Util.IsDifficulty(19))
 			return;
-		}
 		
-		__instance.coolDownMultiplier = 1.5f; // Brutal: 1.25f
-		__instance.maxBurst = 18; // Brutal: 10
+		__instance.beamsAmount = 2;
+		if (__instance.isEnraged) {
+			__instance.beamsAmount = 3;
+		}
+	}
+
+	// MAURICE PATCH (hard mode shockwave)
+	[HarmonyPrefix]
+	[HarmonyPatch(typeof(MaliciousFace), nameof(MaliciousFace.HandleCollision))]
+	public static bool HandleCollisionPrefix(Collision other, MaliciousFace __instance) {
+		if (!Util.IsHardMode())
+			return true;
+
+		// if (LayerMaskDefaults.IsMatchingLayer(other.gameObject.layer, LMD.Environment)) {
+		// 	if (other.gameObject.CompareTag("Floor")) {
+		// 		GameObject shockwave = UnityObject.Instantiate<GameObject>(Plugin.Prefabs["PhysicalShockwave"], __instance.transform.position - __instance.transform.up, Quaternion.identity);
+		// 		PhysicalShockwave component = shockwave.GetComponent<PhysicalShockwave>();
+
+		// 		component.speed = 50f; //50f; // Brutal (cerberus): 75f
+		// 		component.damage = Mathf.RoundToInt(25f * __instance.eid.totalDamageModifier);
+		// 		component.maxSize = 75f; // default (cerberus): 100f
+		// 		component.enemy = true;
+		// 		component.enemyType = EnemyType.MaliciousFace;
+		// 	}
+		// }
+
+		if (other.gameObject.CompareTag("Moving")) {
+			__instance.BreakCorpse();
+			MonoSingleton<CameraController>.Instance.CameraShake(2f);
+			return false;
+		}
+
+		if (LayerMaskDefaults.IsMatchingLayer(other.gameObject.layer, LMD.Environment)) {
+			Breakable breakable;
+			if (other.gameObject.CompareTag("Floor")) {
+				__instance.rb.isKinematic = true;
+				__instance.rb.SetGravityMode(false);
+				Transform transform = __instance.transform;
+				UnityObject.Instantiate<GameObject>(__instance.impactParticle, transform.position, transform.rotation);
+				__instance.spriteRot.eulerAngles = new Vector3(other.contacts[0].normal.x + 90f, other.contacts[0].normal.y, other.contacts[0].normal.z);
+				__instance.spritePos = new Vector3(other.contacts[0].point.x, other.contacts[0].point.y + 0.1f, other.contacts[0].point.z);
+				// AudioSource componentInChildren = UnityObject.Instantiate<GameObject>(__instance.shockwave.ToAsset(), __instance.spritePos, Quaternion.identity).GetComponentInChildren<AudioSource>();
+				// if (componentInChildren) {
+				// 	Object.Destroy(componentInChildren);
+				// }
+
+				GameObject shockwaveObject = UnityObject.Instantiate<GameObject>(Plugin.Prefabs["PhysicalShockwave"], __instance.transform.position - 2f * __instance.transform.up, Quaternion.identity);
+				PhysicalShockwave shockwave = shockwaveObject.GetComponent<PhysicalShockwave>();
+				shockwave.speed = 50f; //50f; // Brutal (cerberus): 75f
+				shockwave.damage = Mathf.RoundToInt(25f * __instance.eid.totalDamageModifier);
+				shockwave.maxSize = 75f; // default (cerberus): 100f
+				shockwave.enemy = true;
+				shockwave.enemyType = EnemyType.MaliciousFace;
+
+				Transform transform2 = __instance.transform;
+				transform2.position -= transform2.up * 1.5f;
+				__instance.spiderFalling = false;
+				__instance.rb.excludeLayers = default(LayerMask);
+				MaliciousFaceCatcher maliciousFaceCatcher;
+				if (!other.gameObject.TryGetComponent<MaliciousFaceCatcher>(out maliciousFaceCatcher)) {
+					UnityObject.Instantiate<GameObject>(__instance.impactSprite, __instance.spritePos, __instance.spriteRot).transform.SetParent(__instance.gz.goreZone, true);
+				}
+				SphereCollider obj;
+				if (__instance.TryGetComponent<SphereCollider>(out obj)) {
+					UnityObject.Destroy(obj);
+				}
+				SpiderBodyTrigger componentInChildren2 = __instance.transform.parent.GetComponentInChildren<SpiderBodyTrigger>(true);
+				if (componentInChildren2) {
+					UnityObject.Destroy(componentInChildren2.gameObject);
+				}
+				__instance.rb.GetComponent<NavMeshObstacle>().enabled = true;
+				MonoSingleton<CameraController>.Instance.CameraShake(2f);
+				if (__instance.fallEnemiesHit.Count > 0) {
+					foreach (EnemyIdentifier enemyIdentifier in __instance.fallEnemiesHit) {
+						Collider collider;
+						if (enemyIdentifier != null && !enemyIdentifier.dead && enemyIdentifier.TryGetComponent<Collider>(out collider)) {
+							Physics.IgnoreCollision(__instance.headCollider, collider, false);
+						}
+					}
+					__instance.fallEnemiesHit.Clear();
+					return false;
+				}
+			} else if (other.gameObject.TryGetComponent<Breakable>(out breakable) && !breakable.playerOnly && !breakable.specialCaseOnly) {
+				breakable.Break();
+			}
+		}
+		return false;
 	}
 
 	// MAURICE PATCH (projectile burst)
 	[HarmonyPrefix]
 	[HarmonyPatch(typeof(MaliciousFace), nameof(MaliciousFace.ShootProj))]
 	public static bool ShootProjPrefix(ref TargetData targetData, MaliciousFace __instance) {
+		if (__instance.difficulty != 19)
+			return true;
+		
 		Vector3 vector = targetData.headPosition;
 		Vector3 vector2 = __instance.mouth.position;
 		Vector3 direction = vector2 - __instance.transform.position;
@@ -91,11 +201,14 @@ public class MaliciousFacePatch {
 		}
 
 		__instance.currentProj = UnityObject.Instantiate<GameObject>(__instance.proj, vector2, Quaternion.LookRotation(vector - vector2));
-
+		Projectile proj = __instance.currentProj.GetComponent<Projectile>();
 		if (__instance.difficulty == 19) {
-			Projectile projectileComp = __instance.currentProj.GetComponent<Projectile>();
-			projectileComp.enemyDamageMultiplier = 0.175f; // default: 1
-			projectileComp.damage = 20f; // default: 25f
+			proj.GetComponent<RemoveOnTime>().time = 3f;
+			proj.enemyDamageMultiplier = 0.175f; // default: 1
+			proj.damage = 20f; // default: 25f
+			if (Util.IsHardMode()) {
+				proj.enemyDamageMultiplier = 0f;
+			}
 		}
 
 		float projOffset = (float)(1 + __instance.currentBurst / 5 * 2);
@@ -104,35 +217,43 @@ public class MaliciousFacePatch {
 				case 0:
 					__instance.currentProj.transform.LookAt(vector);
 					__instance.currentProj.transform.localScale = new Vector3(1.5f, 1.5f, 1.5f); // default: 1, 1, 1
-					__instance.currentProj.GetComponent<Projectile>().damage = 40f;
+					proj.damage = 40f;
 					break;
 				case 1:
 					__instance.currentProj.transform.LookAt(vector + __instance.transform.right * projOffset);
 					break;
 				case 2:
-					__instance.currentProj.transform.LookAt(vector + __instance.transform.right * projOffset
-																		+ __instance.transform.up * projOffset);
+					__instance.currentProj.transform.LookAt(
+						vector + __instance.transform.right * projOffset
+						+ __instance.transform.up * projOffset
+					);
 					break;
 				case 3:
 					__instance.currentProj.transform.LookAt(vector + __instance.transform.up * projOffset);
 					break;
 				case 4:
-					__instance.currentProj.transform.LookAt(vector + __instance.transform.up * projOffset
-																		- __instance.transform.right * projOffset);
+					__instance.currentProj.transform.LookAt(
+						vector + __instance.transform.up * projOffset
+						- __instance.transform.right * projOffset
+					);
 					break;
 				case 5:
 					__instance.currentProj.transform.LookAt(vector - __instance.transform.right * projOffset);
 					break;
 				case 6:
-					__instance.currentProj.transform.LookAt(vector - __instance.transform.right * projOffset
-																		- __instance.transform.up * projOffset);
+					__instance.currentProj.transform.LookAt(
+						vector - __instance.transform.right * projOffset
+						- __instance.transform.up * projOffset
+						);
 					break;
 				case 7:
 					__instance.currentProj.transform.LookAt(vector - __instance.transform.up * projOffset);
 					break;
 				case 8:
-					__instance.currentProj.transform.LookAt(vector - __instance.transform.up * projOffset
-																		+ __instance.transform.right * projOffset);
+					__instance.currentProj.transform.LookAt(
+						vector - __instance.transform.up * projOffset
+						+ __instance.transform.right * projOffset
+					);
 					break;
 			}
 		} else if (__instance.difficulty >= 4) {
@@ -151,39 +272,39 @@ public class MaliciousFacePatch {
 					break;
 			}
 		}
-		Projectile component = __instance.currentProj.GetComponent<Projectile>();
+
 		if (!flag) {
-			component.safeEnemyType = EnemyType.MaliciousFace;
-			component.targetHandle = targetData.handle;
-			if (__instance.difficulty == 19) {
-				component.speed *= 1.5f; // Brutal: 1.25f
-			} else if (__instance.difficulty > 2) {
-				component.speed *= 1.25f;
-			} else if (__instance.difficulty == 1) {
-				component.speed *= 0.75f;
-			} else if (__instance.difficulty == 0) {
-				component.speed *= 0.5f;
-			}
-			component.damage *= __instance.eid.totalDamageModifier;
+			proj.safeEnemyType = EnemyType.MaliciousFace;
+			proj.targetHandle = targetData.handle;
+			if (__instance.difficulty == 19)
+				proj.speed *= 1.5f; // Brutal: 1.25f
+			else if (__instance.difficulty > 2)
+				proj.speed *= 1.25f;
+			else if (__instance.difficulty == 1)
+				proj.speed *= 0.75f;
+			else if (__instance.difficulty == 0)
+				proj.speed *= 0.5f;
+			proj.damage *= __instance.eid.totalDamageModifier;
 		} else {
-			component.Explode();
+			proj.Explode();
 		}
 
 		__instance.currentBurst++;
 		__instance.readyToShoot = false;
-		if (__instance.difficulty == 19) {
-			__instance.Invoke("ReadyToShoot", 0.025f / __instance.eid.totalSpeedModifier); // Brutal: 0.05f instead of 0.025f
-			return false;
-		}
-		if (__instance.difficulty >= 4) {
-			__instance.Invoke("ReadyToShoot", 0.05f / __instance.eid.totalSpeedModifier);
-			return false;
-		}
-		if (__instance.difficulty > 0) {
-			__instance.Invoke("ReadyToShoot", 0.1f / __instance.eid.totalSpeedModifier);
-			return false;
-		}
-		__instance.Invoke("ReadyToShoot", 0.2f / __instance.eid.totalSpeedModifier);
+
+		float invokeTime;
+		if (Util.IsHardMode()) 
+			invokeTime = 0.02f;
+		else if (__instance.difficulty == 19)
+			invokeTime = 0.025f; // Brutal: 0.05f instead of 0.025f
+		else if (__instance.difficulty >= 4)
+			invokeTime = 0.05f;
+		else if (__instance.difficulty > 0)
+			invokeTime = 0.1f;
+		else
+			invokeTime = 0.2f;
+
+		__instance.Invoke("ReadyToShoot", invokeTime / __instance.eid.totalSpeedModifier);
 		return false;
 	}
 }

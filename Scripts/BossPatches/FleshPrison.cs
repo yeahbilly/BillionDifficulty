@@ -10,13 +10,11 @@ public class FleshPrisonPatch {
 	[HarmonyPrefix]
 	[HarmonyPatch(typeof(FleshPrison), nameof(FleshPrison.SpawnInsignia))]
 	public static bool SpawnInsigniaPrefix(FleshPrison __instance) {
-		if (__instance.difficulty != 19) {
+		if (__instance.difficulty != 19)
 			return true;
-		}
-
-		if (__instance.eid.target == null) {
+		if (__instance.eid.target == null)
 			return false;
-		}
+
 		__instance.inAction = false;
 		GameObject gameObject = Object.Instantiate<GameObject>(__instance.insignia, __instance.eid.target.position, Quaternion.identity);
 		if (__instance.altVersion) {
@@ -64,6 +62,10 @@ public class FleshPrisonPatch {
 				num = 8f;
 				break;
 		}
+
+		if (Util.IsHardMode())
+			num = 12f;
+
 		gameObject.transform.localScale = new Vector3(num, 2f, num);
 		gameObject.transform.SetParent(GoreZone.ResolveGoreZone(__instance.transform).transform, true);
 		if (__instance.fleshDroneCooldown < 1f) {
@@ -76,9 +78,8 @@ public class FleshPrisonPatch {
 	[HarmonyPrefix]
 	[HarmonyPatch(typeof(FleshPrison), nameof(FleshPrison.ProjectileBurstUpdate))]
 	public static bool ProjectileBurstUpdatePrefix(FleshPrison __instance) {
-		if (__instance.difficulty != 19) {
+		if (__instance.difficulty != 19)
 			return true;
-		}
 
 		__instance.homingProjectileCooldown = Mathf.MoveTowards(__instance.homingProjectileCooldown, 0f, Time.deltaTime * (Mathf.Abs(__instance.rotationSpeed) / 10f) * __instance.eid.totalSpeedModifier);
 		if (__instance.homingProjectileCooldown <= 0f) {
@@ -137,13 +138,11 @@ public class FleshPrisonPatch {
 	[HarmonyPrefix]
 	[HarmonyPatch(typeof(FleshPrison), nameof(FleshPrison.SpawnFleshDrones))]
 	public static bool SpawnFleshDronesPrefix(FleshPrison __instance) {
-		if (__instance.difficulty != 19) {
+		if (__instance.difficulty != 19)
 			return true;
-		}
-
-		if (__instance.eid.target == null) {
+		if (__instance.eid.target == null)
 			return false;
-		}
+
 		float d = 360f / (float)__instance.droneAmount;
 		if (__instance.currentDrone == 0) {
 			__instance.targeter = new GameObject("Targeter");
@@ -155,11 +154,19 @@ public class FleshPrisonPatch {
 		}
 		if (__instance.currentDrone < __instance.droneAmount) {
 			__instance.secondaryBarValue = (float)__instance.currentDrone / (float)__instance.droneAmount;
+
+			GameObject droneToSpawn;
+			if (!Util.IsHardMode() || (Util.IsHardMode() && __instance.altVersion))
+				droneToSpawn = (__instance.currentDrone % 2 == 0) ? __instance.skullDrone : __instance.fleshDrone;
+			else
+				droneToSpawn = __instance.skullDrone;
+
 			GameObject gameObject = Object.Instantiate<GameObject>(
-				(__instance.currentDrone % 2 == 0) ? __instance.skullDrone : __instance.fleshDrone, // edited line
+				droneToSpawn,
 				__instance.targeter.transform.position + __instance.targeter.transform.up * (float)(__instance.altVersion ? 50 : 20),
 				__instance.targeter.transform.rotation
 				);
+			
 			gameObject.transform.SetParent(__instance.transform, true);
 			EnemyIdentifier enemyIdentifier;
 			if (gameObject.TryGetComponent<EnemyIdentifier>(out enemyIdentifier)) {

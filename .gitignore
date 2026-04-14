@@ -1,6 +1,6 @@
 .hidden/
 lib/*
-!lib/.gitkeep
+!lib/Configgy.dll
 assets/old/
 
 ## Ignore Visual Studio temporary files, build results, and

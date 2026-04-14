@@ -11,23 +11,28 @@ public class StreetcleanerPatch {
 	[HarmonyPostfix]
 	[HarmonyPatch(typeof(Streetcleaner), nameof(Streetcleaner.Start))]
 	public static void StartPostfix(Streetcleaner __instance) {
-		if (__instance.difficulty != 19) {
+		if (__instance.difficulty != 19)
 			return;
-		}
 
-		//__instance.gameObject.AddComponent<StreetcleanerAfterburn>().damage = Mathf.RoundToInt(4 * __instance.eid.totalDamageModifier);
-		__instance.anim.speed = 1.25f; // Brutal: 1f
-		__instance.nma.speed = 30f; // Brutal: 24f
+		float hardModeMult = (!Util.IsHardMode()) ? 1f : 1.1f;
+		__instance.anim.speed = 1.25f * hardModeMult * __instance.eid.totalSpeedModifier; // Brutal: 1f
+		__instance.nma.speed = 30f * hardModeMult; // Brutal: 24f
+		__instance.nma.acceleration = 80f; // default: 64f
+		__instance.nma.angularSpeed = 5000f; // default: 1600f
+
+		if (Util.IsHardMode()) {
+			var afterburn = __instance.gameObject.AddComponent<StreetcleanerAfterburn>();
+			afterburn.damage = Mathf.RoundToInt(4 * __instance.eid.totalDamageModifier);
+		}
 
 		// Transform fire = __instance.transform.Find("flameboi2rig2/Armature/flamethrowergrip/Fire");
-		Transform fire = __instance.transform.Find("flameboi2rig2").Find("Armature").Find("flamethrowergrip").Find("Fire");
-		if (fire == null) {
+		Transform fire = __instance.transform.GetChild(0)?.GetChild(0)?.Find("flameboi2rig2")?.Find("Armature")?.Find("flamethrowergrip")?.Find("Fire");
+		if (fire == null)
 			return;
-		}
+
 		ParticleSystem particles = fire.Find("Particle System").GetComponent<ParticleSystem>();
 		var limitVelocity = particles.limitVelocityOverLifetime;
 		limitVelocity.dampen /= 1.35f; // particles go 1.35 times further
-		// fire.Find("Particle System").Find("Cube").localScale *= 1.35f;
 		fire.Find("Particle System/Cube").localScale *= 1.35f;
 	}
 
@@ -35,13 +40,14 @@ public class StreetcleanerPatch {
 	[HarmonyPrefix]
 	[HarmonyPatch(typeof(Streetcleaner), nameof(Streetcleaner.GetSpeed))]
 	public static bool GetSpeedPrefix(int difficulty, ref EnemyMovementData __result) {
-		if (difficulty != 19) {
+		if (difficulty != 19)
 			return true;
-		}
+
+		float hardModeMult = (!Util.IsHardMode()) ? 1f : 1.1f;
 		__result = new EnemyMovementData {
+			speed = 30f * hardModeMult,
 			acceleration = 80f, // default: 64f
 			angularSpeed = 5000f, // default: 1600f
-			speed = 30f
 		};
 		return false;
 	}
@@ -51,9 +57,8 @@ public class StreetcleanerPatch {
 	[HarmonyPatch(typeof(EnemyIdentifier), nameof(EnemyIdentifier.GetReachDistanceMultiplier))]
 	public static bool GetReachDistanceMultiplierPostfix(EnemyIdentifier __instance, ref float __result) {
 		bool isStreetcleaner = __instance.difficulty == 19 && __instance.enemyType == EnemyType.Streetcleaner;
-		if (!isStreetcleaner) {
+		if (!isStreetcleaner)
 			return true;
-		}
 		__result = 0.75f;
 		return false;
 	}
@@ -62,15 +67,14 @@ public class StreetcleanerPatch {
 	[HarmonyPrefix]
 	[HarmonyPatch(typeof(Streetcleaner), nameof(Streetcleaner.LateUpdate))]
 	public static bool LateUpdatePrefix(Streetcleaner __instance) {
-		if (__instance.difficulty < 4) {
+		if (__instance.difficulty != 19)
+			return true;
+
+		if (!__instance.attacking)
 			return false;
-		}
-		if (!__instance.attacking) {
+		if (__instance.target == null)
 			return false;
-		}
-		if (__instance.target == null) {
-			return false;
-		}
+
 		Vector3 a = __instance.hasVision ? __instance.targetData.headPosition : __instance.target.headPosition;
 		float maxDegreesDelta = (float)((__instance.difficulty == 5) ? 90 : 35);
 		if (__instance.difficulty == 19) {
@@ -88,53 +92,51 @@ public class StreetcleanerPatch {
 		return false;
 	}
 
-	// STREETCLEANER PATCHES (afterburn and speed)
+	// STREETCLEANER PATCHES (speed and afterburn)
 	[HarmonyPostfix]
 	[HarmonyPatch(typeof(Streetcleaner), nameof(Streetcleaner.Update))]
 	public static void UpdatePostfix(Streetcleaner __instance) {
-		if (__instance.difficulty != 19) {
+		if (__instance.difficulty != 19)
 			return;
-		}
 
-		if (!__instance.dead) {
-			if (__instance.nma.speed == 24f || __instance.nma.speed == 20f) {
+		if (!__instance.dead && __instance.nma != null && __instance.nma.enabled && __instance.nma.isOnNavMesh) {
+			float num = __instance.targetData.DistanceTo(__instance.mach.chest.transform.position, false);
+			if (__instance.target != null && __instance.target.isEnemy && __instance.target.enemyIdentifier != null)
+				num *= __instance.target.enemyIdentifier.GetReachDistanceMultiplier();
+			bool flag = !__instance.hasDimensionalTarget && num <= (float)(__instance.attacking ? 16 : 6);
+
+			if (!Util.IsHardMode())
 				__instance.nma.speed = 30f;
-			}
+			else
+				__instance.nma.speed = flag ? 33f : 37.5f;
+			__instance.nma.speed *= __instance.eid.totalSpeedModifier;
 			return;
 		}
 
-		StreetcleanerAfterburn afterburn = __instance.gameObject.GetComponent<StreetcleanerAfterburn>();
-		if (afterburn != null) {
-			afterburn.destroyOnEnd = true;
-		}
+		if (!Util.IsHardMode())
+			return;
+		StreetcleanerAfterburn afterburn = __instance.GetComponent<StreetcleanerAfterburn>();
+		afterburn?.destroyOnEnd = true;
 	}
 
 	[HarmonyPostfix]
 	[HarmonyPatch(typeof(Streetcleaner), nameof(Streetcleaner.StartDamaging))]
 	public static void StartDamagingPostfix(Streetcleaner __instance) {
-		if (__instance.difficulty != 19) {
+		if (!Util.IsHardMode())
 			return;
-		}
-
-		StreetcleanerAfterburn afterburn = __instance.gameObject.GetComponent<StreetcleanerAfterburn>();
-		if (afterburn != null) {
-			afterburn.damagedThePlayer = true;
-		}
+		StreetcleanerAfterburn afterburn = __instance.GetComponent<StreetcleanerAfterburn>();
+		afterburn?.damagedThePlayer = true;
 	}
 
 	[HarmonyPrefix]
 	[HarmonyPatch(typeof(Streetcleaner), nameof(Streetcleaner.StopFire))]
 	public static void StopFirePrefix(Streetcleaner __instance) {
-		if (__instance.difficulty != 19) {
+		if (!Util.IsHardMode())
 			return;
-		}
-		if (!__instance.attacking || !__instance.damaging) {
+		if (!__instance.attacking || !__instance.damaging)
 			return;
-		}
 
-		StreetcleanerAfterburn afterburn = __instance.gameObject.GetComponent<StreetcleanerAfterburn>();
-		if (afterburn != null) {
-			afterburn.stoppedAttacking = true;
-		}
+		StreetcleanerAfterburn afterburn = __instance.GetComponent<StreetcleanerAfterburn>();
+		afterburn?.stoppedAttacking = true;
 	}
 }

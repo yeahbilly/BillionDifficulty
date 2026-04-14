@@ -11,40 +11,46 @@ public class PowerPatch {
 	[HarmonyPostfix]
 	[HarmonyPatch(typeof(Power), nameof(Power.UpdateSpeed))]
 	public static void UpdateSpeedPostfix(Power __instance) {
-		__instance.anim.speed = 1.15f * __instance.eid.totalSpeedModifier; // Brutal: 0.95f * ...
+		float hardModeMult = (!Util.IsHardMode()) ? 1.15f : 1.4f;
+		__instance.anim.speed = hardModeMult * __instance.eid.totalSpeedModifier; // Brutal: 0.95f * ...
+	}
+
+	[HarmonyPostfix]
+	[HarmonyPatch(typeof(Power), nameof(Power.CanPlaySound))]
+	public static void CanPlaySoundPostfix(Power __instance, ref bool __result) {
+		if (__instance.difficulty != 19)
+			return;
+		__result = true;
 	}
 
 	// POWER PATCH (attack cooldown)
 	[HarmonyPostfix]
 	[HarmonyPatch(typeof(Power), nameof(Power.PickAttack))]
 	public static void PickAttackPostfix(Power __instance) {
-		if (__instance.difficulty != 19) {
+		if (__instance.difficulty != 19)
 			return;
-		}
 		__instance.attackCooldown = 1.5f; // Brutal: 2f
+		if (Util.IsHardMode())
+			__instance.attackCooldown = 1.15f;
 	}
 
 	// POWER PATCH (spear attack velocity)
 	[HarmonyPrefix]
 	[HarmonyPatch(typeof(Power), nameof(Power.Spear))]
 	public static void SpearPrefix(Power __instance) {
-		if (__instance.difficulty != 19) {
-            return;
-        }
-        __instance.forwardSpeed = 150f; // Standard~Brutal: 150f
+		if (__instance.difficulty != 19)
+			return;
+		__instance.forwardSpeed = 150f; // Standard~Brutal: 150f
 	}
 
 	// POWER PATCH (spear attack time? idk)
 	[HarmonyPrefix]
 	[HarmonyPatch(typeof(Power), nameof(Power.SpearAttack))]
 	public static bool SpearAttackPrefix(Power __instance) {
-		if (__instance.difficulty != 19) {
+		if (__instance.difficulty != 19)
 			return true;
-		}
-
-		if (!__instance.active || __instance.juggled) {
+		if (!__instance.active || __instance.juggled)
 			return false;
-		}
 		if (__instance.target == null) {
 			__instance.spearAttacks = 0;
 		}
@@ -55,6 +61,7 @@ public class PowerPatch {
 		__instance.spearing = Power.SpearAttackState.Vertical;
 		__instance.goForward = false;
 		__instance.spearAttacks--;
+
 		float num = 1.5f;
 		switch (__instance.difficulty) {
 			case 0:
@@ -71,7 +78,10 @@ public class PowerPatch {
 				num = 0.75f;
 				break;
 		}
+		if (Util.IsHardMode())
+			num = 0.6f;
 		__instance.Invoke("SpearAttack", num / __instance.eid.totalSpeedModifier);
+
 		bool flag = false;
 		Vector3 vector = __instance.lastTargetData.realHeadPosition;
 		float num2 = Random.Range(0f, 1f);
@@ -109,6 +119,7 @@ public class PowerPatch {
 			MonoSingleton<HookArm>.Instance.StopThrow(1f, true);
 		}
 		__instance.LookAtTarget(0);
+
 		float num4 = 0.75f;
 		switch (__instance.difficulty) {
 			case 0:
@@ -125,6 +136,9 @@ public class PowerPatch {
 				num4 = 0.5f;
 				break;
 		}
+		if (Util.IsHardMode())
+			num4 = 0.4f;
+		
 		__instance.Invoke("SpearFlash", num4 / 2f / __instance.eid.totalSpeedModifier);
 		__instance.Invoke("SpearGo", num4 / __instance.eid.totalSpeedModifier);
 		return false;

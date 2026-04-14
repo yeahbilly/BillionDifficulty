@@ -9,8 +9,8 @@ Someone asked for it and I thought why not
 - [HarmonyX wiki](https://github.com/BepInEx/HarmonyX/wiki) (the BepInEx version of Harmony I think)
 
 
-# Setup patches
-Found in `/Scripts/SetupPatches.cs`
+# Patches
+Found in `/Scripts/SetupPatches.cs` and `/Scripts/SavePatches.cs`
 
 Used to make the game recognize the custom difficulty. There will be a short explanation for each patch in the order they appear in the files, so you can open that alongside this guide and see what's actually being described. The explanations might sometimes be vague because this stuff is confusing and it's been a while since I touched those patches
 
@@ -18,7 +18,7 @@ About difficulty id's: every difficulty needs its own id which must be a positiv
 
 This mod uses the difficulty id `19` so you can find it everywhere in the source code
 
-## _Basic functionality_
+## _Basic functionality_ (`SetupPatches.cs`)
 ### `PrefsManager.EnsureValid`
 Makes the game treat `19` as a valid difficulty
 
@@ -34,7 +34,7 @@ Stops the game from submitting any scores achieved on this difficulty
 ### `PresenceController.Start`
 Defines the difficulty name for Discord and Steam rich presence
 
-## _Saves_
+## _Saves_ (`SavePatches.cs`)
 ### `GameProgressSaver.GetProgress` / `.GetPrime` / `.GetEncoreProgress`
 Processes the custom difficulty's save data
 

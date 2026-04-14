@@ -1,4 +1,3 @@
-using Billion = BillionDifficulty.Plugin;
 using System.Collections;
 using HarmonyLib;
 using UnityEngine;
@@ -13,27 +12,25 @@ public class TurretPatch {
 	[HarmonyPostfix]
 	[HarmonyPatch(typeof(Turret), nameof(Turret.Start))]
 	public static void StartPostfix(Turret __instance) {
-		if (__instance.difficulty != 19) {
+		if (__instance.difficulty != 19)
 			return;
-		}
 
 		__instance.maxAimTime = 3.75f; // (to counterbalance the speed buff) Brutal: 3f
 		__instance.anim.speed *= 1.25f;
 		__instance.nma.speed *= 1.25f;
 		SentryMortar sentryMortar = __instance.gameObject.AddComponent<SentryMortar>();
-		sentryMortar.rb = __instance.gameObject.GetComponent<Rigidbody>();
+		sentryMortar.rb = __instance.GetComponent<Rigidbody>();
 	}
 
 	// SENTRY PATCH (shoot 3 times)
 	[HarmonyPrefix]
 	[HarmonyPatch(typeof(Turret), nameof(Turret.Shoot))]
 	public static bool ShootPrefix(Turret __instance) {
-		if (__instance.difficulty != 19) {
-			return false;
-		}
-		SentryMortar sentryMortar = __instance.gameObject.GetComponent<SentryMortar>();
-		sentryMortar.canShootOrb = false;
+		if (__instance.difficulty != 19)
+			return true;
 
+		SentryMortar sentryMortar = __instance.GetComponent<SentryMortar>();
+		sentryMortar.canShootOrb = false;
 
 		if (!__instance.isBarrelPortalBlocked) {
 			Vector3 shootPoint = __instance.isBarrelPortalCrossed ? __instance.barrelPos : new Vector3(__instance.transform.position.x, __instance.barrelTip.transform.position.y, __instance.transform.position.z);
@@ -76,17 +73,37 @@ public class TurretPatch {
 			return (shotNumber + 1f) / 2f;
 	}
 
-	public static IEnumerator ShootMortar(Turret __instance, Transform barrelTip, int shotsLeft, int maxShots) {
-		if (shotsLeft <= 0) {
+	public static IEnumerator ShootMortar(Turret __instance, int shotsLeft, int maxShots) {
+		if (shotsLeft <= 0)
 			yield break;
-		}
 		
 		yield return new WaitForSeconds(shotsLeft == maxShots ? 0.15f : 0.25f);
 
+		if (Util.IsHardMode() && shotsLeft == maxShots) {
+			GameObject fart = UnityObject.Instantiate<GameObject>(
+				Plugin.Prefabs["ProjectileHomingAcid"],
+				__instance.transform.position + 3f * __instance.transform.forward + 3f * __instance.transform.up,
+				__instance.transform.rotation
+			);
+
+			Projectile proj = fart.GetComponent<Projectile>();
+			proj.safeEnemyType = EnemyType.Turret;
+			proj.speed = 25f;
+
+			HurtZone hurtZone = fart.GetComponentInChildren<HurtZone>(includeInactive: true);
+			hurtZone.affected = AffectedSubjects.PlayerOnly; // FUCK YOU
+
+			// fart.transform.Find("GoopCloud").gameObject.AddComponent<RemoveOnRespawn>();
+		}
+
 		float upOffset = shotsLeft != maxShots ? 4.5f : 5f;
 		float forwardOffset = shotsLeft != maxShots ? 3f : 4.5f;
-		GameObject projectile = UnityObject.Instantiate<GameObject>(Billion.ProjectileExplosiveHH, __instance.transform.position + Vector3.up * upOffset + __instance.transform.forward * forwardOffset, Quaternion.identity);
-		projectile.transform.localScale = new Vector3(1.5f, 1.5f, 1.5f); // default: 2, 2, 2
+		GameObject projectile = UnityObject.Instantiate<GameObject>(
+			Plugin.Prefabs["ProjectileExplosiveHH"],
+			__instance.transform.position + __instance.transform.up * upOffset + __instance.transform.forward * forwardOffset,
+			Quaternion.identity
+		);
+		projectile.transform.localScale = 1.5f * Vector3.one; // default: 2, 2, 2
 
 		Projectile projectileComp = projectile.GetComponent<Projectile>();
 		//projectileComp.explosionEffect.transform.localScale = new Vector3(6, 6, 6); // default: 12, 12, 12
@@ -111,13 +128,13 @@ public class TurretPatch {
 		projectileComp.predictiveHomingMultiplier = 0.75f; // default: 0
 		projectileComp.bigExplosion = false;
 
-		Vector3 bigProjectileExtraForce = new Vector3(0,0,0);
+		Vector3 bigProjectileExtraForce = Vector3.zero;
 		// big projectile
 		if (shotsLeft == maxShots) {
 			Vector3 distance = __instance.eid.target.position - __instance.transform.position;
 			// Vector3(0, 24f, 0) + 0.7f *
 			bigProjectileExtraForce = new Vector3(0.9f * distance.x, 16f + 0.75f * distance.y, 0.9f * distance.z);
-			projectile.transform.localScale = new Vector3(2.5f, 2.5f, 2.5f);
+			projectile.transform.localScale = 2.5f * Vector3.one;
 			ProjectileHeightExplosion heightExplosion = projectile.AddComponent<ProjectileHeightExplosion>();
 			heightExplosion.maxDistance = 8f;
 			heightExplosion.target = __instance.eid.target;
@@ -142,53 +159,53 @@ public class TurretPatch {
 		Rigidbody projectileRigidbody = projectile.GetComponent<Rigidbody>();
 		projectileRigidbody.drag = shotsLeft != maxShots ? -2.2f : 0f;
 		
-		Rigidbody sentryRigidbody = __instance.gameObject.GetComponent<Rigidbody>();
+		Rigidbody sentryRigidbody = __instance.GetComponent<Rigidbody>();
 		if (sentryRigidbody.velocity.y > 2f) {
 			projectileRigidbody.drag /= 0.5f * sentryRigidbody.velocity.y;
 			if (projectileRigidbody.drag < -2.2f) {
 				projectileRigidbody.drag = 0f;
 			}
 		}
+
 		AddForce forceComp = projectile.AddComponent<AddForce>();
 		forceComp.onEnable = true;
-		forceComp.force = new Vector3(0, 12, 0)
+		forceComp.force =
+			12f * __instance.transform.up // new Vector3(0, 12, 0)
 			+ 10f * (
-				barrelTip.forward
-				- new Vector3(0, barrelTip.forward.y, 0) // makes it not shoot upwards too much
-				+ 0.2f * barrelTip.right * CalculateMortarAngle(maxShots-shotsLeft)
+				__instance.transform.forward
+				- new Vector3(0, __instance.transform.forward.y, 0) // makes it not shoot upwards too much
+				+ 0.2f * __instance.transform.right * CalculateMortarAngle(maxShots-shotsLeft)
 			)
 			+ bigProjectileExtraForce;
 		projectile.SetActive(false);
 		projectile.SetActive(true);
 
-		__instance.StartCoroutine(ShootMortar(__instance, __instance.barrelTip, shotsLeft-1, maxShots));
+		__instance.StartCoroutine(ShootMortar(__instance, shotsLeft-1, maxShots));
 	}
 
 	// SENTRY PATCH (interruption attack)
 	[HarmonyPrefix]
 	[HarmonyPatch(typeof(Turret), nameof(Turret.CancelAim))]
 	public static void CancelAimPrefix(Turret __instance) {
-		if (__instance.difficulty != 19) {
+		if (__instance.difficulty != 19)
 			return;
-		}
+
 		// if (__instance.isBarrelPortalBlocked) {
 		// 	return;
 		// }
 		
-		SentryMortar sentryMortar = __instance.gameObject.GetComponent<SentryMortar>();
+		SentryMortar sentryMortar = __instance.GetComponent<SentryMortar>();
 		if (__instance.aiming && sentryMortar.canShootOrb) {
-			__instance.StartCoroutine(ShootMortar(__instance, __instance.barrelTip, 3, 3));
+			__instance.StartCoroutine(ShootMortar(__instance, 3, 3));
 		}
 	}
 
 	[HarmonyPostfix]
 	[HarmonyPatch(typeof(Turret), nameof(Turret.CancelAim))]
 	public static void CancelAimPostfix(Turret __instance) {
-		if (__instance.difficulty != 19) {
+		if (__instance.difficulty != 19)
 			return;
-		}
-
-		SentryMortar sentryMortar = __instance.gameObject.GetComponent<SentryMortar>();
+		SentryMortar sentryMortar = __instance.GetComponent<SentryMortar>();
 		sentryMortar.canShootOrb = true;
 	}
 }

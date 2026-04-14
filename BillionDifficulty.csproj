@@ -4,7 +4,7 @@
     <TargetFramework>netstandard2.1</TargetFramework>
     <AssemblyName>BillionDifficulty</AssemblyName>
     <Product>Billion Difficulty</Product>
-    <Version>1.6.1</Version>
+    <Version>2.0.0</Version>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <LangVersion>latest</LangVersion>
     <RestoreAdditionalProjectSources>
@@ -48,10 +48,26 @@
     <Reference Include="UnityEngine.ResourceManagement">
       <HintPath>lib\Unity.ResourceManager.dll</HintPath>
     </Reference>
+    <Reference Include = "Configgy">
+      <HintPath>lib\Configgy.dll</HintPath>
+    </Reference>
   </ItemGroup>
 
   <ItemGroup>
     <EmbeddedResource Include="assets\zombie_MeleeHusk_MouthOpen_Diffuse.png" />
     <EmbeddedResource Include="assets\zombie_MeleeHusk_MouthClosed_Diffuse.png" />
   </ItemGroup>
+
+  <Target Name="RemoveUnwantedDLLs" AfterTargets="Build">
+    <ItemGroup>
+      <UnwantedDLLs Include="$(OutputPath)Assembly-CSharp.dll" />
+      <UnwantedDLLs Include="$(OutputPath)Configgy.dll" />
+      <UnwantedDLLs Include="$(OutputPath)Unity.Addressables.dll" />
+      <UnwantedDLLs Include="$(OutputPath)Unity.ResourceManager.dll" />
+      <UnwantedDLLs Include="$(OutputPath)Unity.TextMeshPro.dll" />
+      <UnwantedDLLs Include="$(OutputPath)UnityEngine.UI.dll" />
+      <UnwantedDLLs Include="$(OutputPath)*.deps.json" />
+    </ItemGroup>
+    <Delete Files="@(UnwantedDLLs)" />
+  </Target>
 </Project>

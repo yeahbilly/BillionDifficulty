@@ -11,19 +11,16 @@ public class V2Patch {
 	[HarmonyPrefix]
 	[HarmonyPatch(typeof(V2), nameof(V2.SetSpeed))]
 	public static bool SetSpeedPrefix(V2 __instance) {
-		if (__instance.difficulty != 19) {
+		if (__instance.difficulty != 19)
 			return true;
-		}
 
-		if (!__instance.nma) {
+		if (!__instance.nma)
 			__instance.nma = __instance.GetComponent<NavMeshAgent>();
-		}
-		if (!__instance.eid) {
+		if (!__instance.eid)
 			__instance.eid = __instance.GetComponent<EnemyIdentifier>();
-		}
-		if (__instance.difficulty < 0) {
+		if (__instance.difficulty < 0)
 			__instance.difficulty = Enemy.InitializeDifficulty(__instance.eid);
-		}
+		
 		if (__instance.originalMovementSpeed != 0f) {
 			__instance.movementSpeed = __instance.originalMovementSpeed;
 		} else {
@@ -66,25 +63,22 @@ public class V2Patch {
 	[HarmonyPrefix]
 	[HarmonyPatch(typeof(V2), nameof(V2.UpdateCooldowns))]
 	public static bool UpdateCooldownsPrefix(V2 __instance) {
-		if (__instance.difficulty != 19) {
+		if (__instance.difficulty != 19)
 			return true;
-		}
 
 		if (__instance.patternCooldown > 0f) {
 			__instance.patternCooldown = Mathf.MoveTowards(__instance.patternCooldown, 0f, Time.deltaTime);
 		}
 		if (__instance.shootCooldown > 0f || __instance.altShootCooldown > 0f) {
 			float num = 1f;
-			if (__instance.difficulty == 1) {
-				num = 0.85f;
-			}
-			if (__instance.difficulty == 0) {
-				num = 0.75f;
-			}
-
-			if (__instance.difficulty == 19) {
+			// if (__instance.difficulty == 1)
+			// 	num = 0.85f;
+			// if (__instance.difficulty == 0)
+			// 	num = 0.75f;
+			if (__instance.difficulty == 19)
 				num = 1.25f; // default: 1f
-			}
+			if (Util.IsHardMode())
+				num = 1.45f;
 
 			if (__instance.shootCooldown > 0f) {
 				__instance.shootCooldown = Mathf.MoveTowards(__instance.shootCooldown, 0f, Time.deltaTime * num * (__instance.cowardPattern ? 0.5f : 1f) * __instance.eid.totalSpeedModifier);
@@ -112,6 +106,8 @@ public class V2Patch {
 					num2 = 1.25f;
 					break;
 			}
+			if (Util.IsHardMode())
+				num2 = 1.4f;
 			__instance.dodgeCooldown = Mathf.MoveTowards(__instance.dodgeCooldown, 6f, Time.deltaTime * num2 * __instance.eid.totalSpeedModifier);
 		}
 		if (__instance.dodgeLeft > 0f) {
@@ -151,22 +147,13 @@ public class V2Patch {
 	[HarmonyPrefix]
 	[HarmonyPatch(typeof(V2), nameof(V2.Dodge))]
 	public static bool DodgePrefix(Transform projectile, V2 __instance) {
-		if (__instance.difficulty != 19) {
+		if (__instance.difficulty != 19)
 			return true;
-		}
+		if (__instance.target == null || !__instance.active || __instance.dodgeLeft > 0f || __instance.chargingAlt)
+			return false;
+		if (Vector3.Distance(__instance.transform.position, __instance.target.position) <= 15f)
+			return false;
 
-		if (__instance.target == null || !__instance.active) {
-			return false;
-		}
-		if (__instance.dodgeLeft > 0f) {
-			return false;
-		}
-		if (__instance.chargingAlt) {
-			return false;
-		}
-		if (Vector3.Distance(__instance.transform.position, __instance.target.position) <= 15f) {
-			return false;
-		}
 		if (__instance.dodgeCooldown >= 1.5f /*6 - __instance.difficulty*/) {
 			__instance.dodgeCooldown -= 1.5f /*6 - __instance.difficulty*/;
 			Vector3 direction = new Vector3(__instance.transform.position.x - projectile.position.x, 0f, __instance.transform.position.z - projectile.position.z);
@@ -183,9 +170,9 @@ public class V2Patch {
 				return false;
 			}
 			float num = Random.Range(0f, (__instance.difficulty >= 3) ? 2f : 3f);
-			if (num > 1f) {
+			if (num > 1f)
 				return false;
-			}
+
 			if (num > 0.75f) {
 				__instance.Jump();
 				return false;
@@ -199,9 +186,8 @@ public class V2Patch {
 	[HarmonyPrefix]
 	[HarmonyPatch(typeof(V2), nameof(V2.ShootCheck))]
 	public static bool ShootCheckPrefix(V2 __instance) {
-		if (__instance.difficulty != 19) {
+		if (__instance.difficulty != 19)
 			return true;
-		}
 
 		float num = Vector3.Distance(__instance.target.position, __instance.transform.position);
 		if (!__instance.aboutToShoot) {
@@ -268,6 +254,8 @@ public class V2Patch {
 					num2 = 0.8f;
 					break;
 			}
+			if (Util.IsHardMode())
+				num2 = 0.55f;
 			__instance.Invoke("AltShootWeapon", num2 / __instance.eid.totalSpeedModifier);
 		} else {
 			if (__instance.currentWeapon == 0) {
@@ -313,6 +301,8 @@ public class V2Patch {
 					num3 = 0.6f;
 					break;
 			}
+			if (Util.IsHardMode())
+				num3 = 0.4f;
 			__instance.Invoke("ShootWeapon", num3 / __instance.eid.totalSpeedModifier);
 		}
 		return false;

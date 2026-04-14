@@ -1,5 +1,5 @@
 # Billion Difficulty
-![version 1.6.1](https://img.shields.io/badge/version-1.6.1-blue) [![Thunderstore page](https://img.shields.io/badge/Thunderstore%20page-gray?logo=thunderstore)](https://thunderstore.io/c/ultrakill/p/BillyMod/BillionDifficulty/)
+![version 2.0.0](https://img.shields.io/badge/version-2.0.0-blue) [![Thunderstore page](https://img.shields.io/badge/Thunderstore%20page-gray?logo=thunderstore)](https://thunderstore.io/c/ultrakill/p/BillyMod/BillionDifficulty/)
 
 Custom difficulty mod for ULTRAKILL (which is currently in early access), last updated for patch 17b2
 

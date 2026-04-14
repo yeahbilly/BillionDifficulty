@@ -10,18 +10,19 @@ public class SpinPatch {
 	[HarmonyPrefix]
 	[HarmonyPatch(typeof(Spin), nameof(Spin.Start))]
 	public static void StartPrefix(Spin __instance) {
-		if (__instance.eid && __instance.eid.difficultyOverride >= 0) {
+		if (__instance.eid && __instance.eid.difficultyOverride >= 0)
 			__instance.difficulty = __instance.eid.difficultyOverride;
-		} else {
+		else
 			__instance.difficulty = Util.GetDifficulty();
-		}
 
-		if (__instance.difficulty != 19) {
+		if (__instance.difficulty != 19)
 			return;
-		}
 
 		if (__instance.transform.name == "LaserRing" && __instance.difficultyVariance) {
-			__instance.difficultySpeedMultiplier *= 1.3f;
+			if (!Util.IsHardMode())
+				__instance.difficultySpeedMultiplier *= 1.3f;
+			else
+				__instance.difficultySpeedMultiplier *= 1.5f;
 		}
 	}
 }
@@ -49,16 +50,15 @@ public class CountdownPatch {
 [HarmonyPatch(typeof(DifficultyDependantObject), nameof(DifficultyDependantObject.Awake))]
 public class DifficultyDependantObjectPatch {
 	public static bool Prefix(ref DifficultyDependantObject __instance) {
-		if (!Util.IsDifficulty(19)) {
+		if (!Util.IsDifficulty(19))
 			return true;
-		}
 
 		__instance.veryHard = true; // veryHard: 4 (brutal)
 
 		UnityEvent unityEvent2 = __instance.onRightDifficulty;
-		if (unityEvent2 == null) {
+		if (unityEvent2 == null)
 			return false;
-		}
+
 		unityEvent2.Invoke();
 		return false;
 	}

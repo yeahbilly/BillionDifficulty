@@ -1,3 +1,22 @@
+## Version 2.0.0 🎉 (2026-04-)
+- Added the Brilliant Billion mode
+- Fixed enemies using the Drone script not being able to attack
+- Fixed Sentries not shooting on other difficulties
+- Fixed Sentries shooting orbs in some weird direction
+- Fixed Swordsmachine behaviour and missing pump audio
+- Reduced the lifespans of some projectiles that were needlessly long
+- Slightly changed how level save paths are done so it should be less likely that something will break because of other mods in the future
+- Reduced the number of projectiles that Guttertank rockets spawn so it should lag a bit less (but now they're bigger), and the projectiles now don't damage enemies
+- Stalker healing now scales with radiance (specifically the 1.5x damage multiplier)
+- *Buff*: Schism projectiles stay in the air for 1.25 seconds longer and don't deal damage to enemies after they become darker
+- *Buff*: Malicious Faces now shoot 1 more beam (2 beams normally and 3 when enraged)
+- *Buff*: Decreased damage weaknesses for Cerberi, Virtues and Providences
+- *Buff*: Hideous Mass and Defense System Mortar orb homing is stronger
+- *Buff*: Providence beam width increased and it no longer damages enemies
+- *Buff*: Added Mirror Reaper changes
+- *Buff*: The friendly fire style bonus now gives 50 points for kills and 40 for just damaging instead of 250 and 200
+- I think Soldiers are now immune to explosions again but at this point I don't remember if they actually weren't before
+
 ## Version 1.6.1 (2026-03-10)
 - Fixed a few audio sources not working with portals
 - *Fix/buff*: Guttermen can now dodge independent of gravity (though they may still be limited by the dimensions of the portal-connected area they're in)

@@ -10,11 +10,12 @@ public class MinotaurPatch {
 	[HarmonyPrefix]
 	[HarmonyPatch(typeof(Minotaur), nameof(Minotaur.GetSpeed))]
 	public static bool GetSpeedPrefix(int difficulty, Minotaur __instance, ref EnemyMovementData __result) {
-		if (difficulty != 19) {
+		if (difficulty != 19)
 			return true;
-		}
 
 		float num = 1.4f; // Brutal: 1.2f
+		if (Util.IsHardMode())
+			num = 1.65f;
 
 		__result = new EnemyMovementData {
 			speed = 50f * num,
@@ -27,11 +28,12 @@ public class MinotaurPatch {
 	[HarmonyPostfix]
 	[HarmonyPatch(typeof(Minotaur), nameof(Minotaur.SetSpeed))]
 	public static void SetSpeedPostfix(Minotaur __instance) {
-		if (__instance.difficulty != 19) {
+		if (__instance.difficulty != 19)
 			return;
-		}
 
 		float num = 1.4f; // Brutal: 1.2f
+		if (Util.IsHardMode())
+			num = 1.65f;
 		__instance.anim.speed = num * __instance.eid.totalSpeedModifier;
 		__instance.nma.speed = 50f * __instance.anim.speed;
 	}
@@ -44,11 +46,10 @@ public class MinotaurChasePatch {
 	[HarmonyPostfix]
 	[HarmonyPatch(typeof(MinotaurChase), nameof(MinotaurChase.SetSpeed))]
 	public static void SetSpeedPostfix(MinotaurChase __instance) {
-		if (__instance.difficulty != 19) {
+		if (__instance.difficulty != 19)
 			return;
-		}
 
-		__instance.movementSpeed = 40f * __instance.eid.totalSpeedModifier; // Brutal: 35f * ...
-		__instance.anim.speed = 1.4f * __instance.eid.totalSpeedModifier; // Brutal: 1.2f * ...
+		__instance.movementSpeed = (!Util.IsHardMode() ? 40f : 50f) * __instance.eid.totalSpeedModifier; // Brutal: 35f * ...
+		__instance.anim.speed = (!Util.IsHardMode() ? 1.4f : 1.65f) * __instance.eid.totalSpeedModifier; // Brutal: 1.2f * ...
 	}
 }

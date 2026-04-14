@@ -12,11 +12,12 @@ public class GabrielBasePatch {
 	[HarmonyPostfix]
 	[HarmonyPatch(typeof(GabrielBase), nameof(GabrielBase.UpdateSpeed))]
 	public static void UpdateSpeedPostfix(GabrielBase __instance) {
-		if (__instance.difficulty != 19) {
+		if (__instance.difficulty != 19)
 			return;
-		}
 
-		__instance.anim.speed = 1.15f * __instance.eid.totalSpeedModifier; // default: 1f * ...
+		float hardModeMult = (!Util.IsHardMode()) ? 1.15f : 1.35f;
+
+		__instance.anim.speed = hardModeMult * __instance.eid.totalSpeedModifier; // default: 1f * ...
 		__instance.defaultAnimSpeed = __instance.anim.speed;
 	}
 }
@@ -28,9 +29,8 @@ public class GabrielPatch {
 	[HarmonyPrefix]
 	[HarmonyPatch(typeof(Gabriel), nameof(Gabriel.SpearCombo))]
 	public static bool SpearComboPrefix(Gabriel __instance) {
-		if (__instance.difficulty != 19) {
+		if (__instance.difficulty != 19)
 			return true;
-		}
 		switch (__instance.difficulty) {
 			case 0:
 				__instance.gabe.forwardSpeed = 60f;
@@ -65,13 +65,12 @@ public class GabrielPatch {
 	[HarmonyPrefix]
 	[HarmonyPatch(typeof(Gabriel), nameof(Gabriel.SpearAttack))]
 	public static bool SpearAttackPrefix(Gabriel __instance) {
-		if (__instance.difficulty != 19) {
+		if (__instance.difficulty != 19)
 			return true;
-		}
 
-		if (__instance.gabe.juggled) {
+		if (__instance.gabe.juggled)
 			return false;
-		}
+
 		if (__instance.target == null) {
 			__instance.spearAttacks = 0;
 		}
@@ -82,6 +81,7 @@ public class GabrielPatch {
 		__instance.gabe.spearing = true;
 		__instance.gabe.goForward = false;
 		__instance.spearAttacks--;
+
 		float num = 1.5f;
 		switch (__instance.difficulty) {
 			case 0:
@@ -100,7 +100,10 @@ public class GabrielPatch {
 				num = 0.6f;
 				break;
 		}
+		if (Util.IsHardMode())
+			num = 0.5f;
 		__instance.Invoke("SpearAttack", num / __instance.eid.totalSpeedModifier);
+
 		num = 0.75f;
 		switch (__instance.difficulty) {
 			case 0:
@@ -119,6 +122,9 @@ public class GabrielPatch {
 				num = 0.4f;
 				break;
 		}
+		if (Util.IsHardMode())
+			num = 0.3f;
+		
 		Vector3 position = __instance.target.headPosition;
 		bool flag = false;
 		RaycastHit raycastHit;

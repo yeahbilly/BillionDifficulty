@@ -1,9 +1,10 @@
 {
     "name": "BillionDifficulty",
-    "version_number": "1.6.1",
+    "version_number": "2.0.0",
     "website_url": "https://github.com/yeahbilly/BillionDifficulty",
-    "description": "A whole new custom Brutal+ difficulty that makes the game harder and faster, adding new attacks and enemy interactions. Huge thanks to Flazhik, TRPG and others since this mod wouldn't exist without them",
+    "description": "A whole new custom Brutal+/UKMD+ difficulty that makes the game harder and faster, adding new attacks and enemy interactions. Huge thanks to Flazhik, TRPG and others since this mod wouldn't exist without them",
     "dependencies": [
-        "BepInEx-BepInExPack-5.4.2100"
+        "BepInEx-BepInExPack-5.4.2305",
+        "Hydraxous-Configgy-1.0.7"
     ]
 }

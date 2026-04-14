@@ -1,6 +1,4 @@
-using Billion = BillionDifficulty.Plugin;
 using System.Collections.Generic;
-using HarmonyLib;
 using UnityEngine;
 using UnityObject = UnityEngine.Object;
 using ULTRAKILL.Cheats;
@@ -17,26 +15,31 @@ class IdolHealingSetup : MonoBehaviour {
 	public float cooldownMax = 2f;
 	public float cooldown = 0f;
 	public bool stop = false;
+
+	public float cooldownMaxOriginal;
+
 	public void Start() {
 		eid = this.GetComponent<EnemyIdentifier>();
 		cooldown = cooldownMax;
+		cooldownMaxOriginal = cooldownMax;
 	}
-	public void Update() {
-		if (stop) {
-			return;
-		}
 
-		if (BlindEnemies.Blind) {
+	public void Update() {
+		if (stop)
 			return;
-		}
+
+
+		if (BlindEnemies.Blind)
+			return;
+
 
 		cooldown += Time.deltaTime;
-		if (cooldown < cooldownMax) {
+		if (cooldown < cooldownMax)
 			return;
-		}
+
 		cooldown = 0f;
 
-		GameObject explosion = UnityObject.Instantiate(Billion.Explosion, eid.transform.position, eid.transform.rotation);
+		GameObject explosion = UnityObject.Instantiate(Plugin.Prefabs["Explosion"], eid.transform.position, eid.transform.rotation);
 		explosion.name = "Idol Healing Explosion";
 		explosion.transform.localScale *= 2.5f;
 		UnityObject.Destroy(explosion.transform.Find("Sphere_8 (1)").gameObject);
@@ -69,57 +72,43 @@ class IdolHealingSetup : MonoBehaviour {
 	}
 }
 
-[HarmonyPatch(typeof(Explosion), nameof(Explosion.Start))]
-public class ExplosionIdolPatch {
-	public static void Postfix(ref Explosion __instance) {
-		if (!Util.IsDifficulty(19) || __instance.transform.parent.name != "Idol Healing Explosion") {
-			return;
-		}
-
-		IdolHealingExplosion idolHeal = __instance.gameObject.AddComponent<IdolHealingExplosion>();
-		EnemyIdentifierSaver saver = __instance.gameObject.GetComponent<EnemyIdentifierSaver>();
-		idolHeal.healing = 0.8f;
-
-		// finds the idol that blesses the enemy
-		EnemyIdentifier[] eids = UnityObject.FindObjectsByType<EnemyIdentifier>(FindObjectsSortMode.None);
-		foreach (EnemyIdentifier eid in eids) {
-			if (eid.idol != null && eid.idol.target == saver.eid) {
-				//idolHeal.healing *= eid.totalHealthModifier;
-				saver.eid.GetComponent<IdolHealingSetup>().cooldownMax = 2f / eid.totalHealthModifier;
-			}
-		}
-	}
-}
-
 class IdolHealingExplosion : MonoBehaviour {
 	public float healing;
+	public float healingReducedHardMode;
 	public List<EnemyIdentifier> healedList = new List<EnemyIdentifier>();
-	void Update() {
+
+	// idk
+	public void Update() {
 		GetComponent<SphereCollider>().enabled = true;
 	}
-	void OnTriggerEnter(Collider other) {
+
+	public void OnTriggerEnter(Collider other) {
 		GameObject enemy = other.gameObject;
-		if (enemy.layer != 10 && enemy.layer != 11) {
+		if (enemy.layer != 10 && enemy.layer != 11)
 			return;
-		}
+
 
 		EnemyIdentifierIdentifier eidid = other.GetComponent<EnemyIdentifierIdentifier>();
 		bool notDead = eidid && eidid.eid && !eidid.eid.dead;
-		if (!notDead) {
+		if (!notDead)
 			return;
-		}
+
 		EnemyIdentifier eid = eidid.eid;
 
 		// heals the enemies
-		if (healedList.Contains(eid)) {
+		if (healedList.Contains(eid))
 			return;
-		}
+
 		if (eid.enemyType == EnemyType.Drone || eid.enemyType == EnemyType.Virtue || eid.enemyType == EnemyType.Providence) {
 			if (!eid.drone) {
 				eid.drone = eid.GetComponent<Drone>();
 			}
 			if (eid.drone && eid.drone.Enemy) {
-				float newHealth = 0.1f * (float)Mathf.RoundToInt(10f * (eid.drone.Enemy.health + healing));
+				float usedHealing = healing;
+				if (Util.IsHardMode() && eid.drone.Enemy.health < 8f) {
+					usedHealing = healingReducedHardMode;
+				}
+				float newHealth = 0.1f * (float)Mathf.RoundToInt(10f * (eid.drone.Enemy.health + usedHealing));
 				eid.drone.Enemy.health = newHealth;
 				eid.health = newHealth;
 				healedList.Add(eid);
@@ -130,7 +119,11 @@ class IdolHealingExplosion : MonoBehaviour {
 				eid.spider = eid.GetComponent<MaliciousFace>();
 			}
 			if (eid.spider) {
-				float newHealth = 0.1f * (float)Mathf.RoundToInt(10f * (eid.spider.spider.health + healing));
+				float usedHealing = healing;
+				if (Util.IsHardMode() && eid.spider.spider.health < 8f) {
+					usedHealing = healingReducedHardMode;
+				}
+				float newHealth = 0.1f * (float)Mathf.RoundToInt(10f * (eid.spider.spider.health + usedHealing));
 				eid.spider.spider.health = newHealth;
 				eid.health = newHealth;
 				healedList.Add(eid);
@@ -144,7 +137,12 @@ class IdolHealingExplosion : MonoBehaviour {
 					eid.zombie = eid.GetComponent<Enemy>();
 				}
 				if (eid.zombie) {
-					float newHealth = 0.1f * (float)Mathf.RoundToInt(10f * (eid.zombie.health + healing));
+					float usedHealing = healing;
+					if (Util.IsHardMode() && eid.zombie.health < 8f) {
+						usedHealing = healingReducedHardMode;
+					}
+					Plugin.Logger.LogWarning("healing: " + usedHealing.ToString());
+					float newHealth = 0.1f * (float)Mathf.RoundToInt(10f * (eid.zombie.health + usedHealing));
 					eid.zombie.health = newHealth;
 					eid.health = newHealth;
 					healedList.Add(eid);
@@ -155,7 +153,11 @@ class IdolHealingExplosion : MonoBehaviour {
 					eid.machine = eid.GetComponent<Enemy>();
 				}
 				if (eid.machine) {
-					float newHealth = 0.1f * (float)Mathf.RoundToInt(10f * (eid.machine.health + healing));
+					float usedHealing = healing;
+					if (Util.IsHardMode() && eid.machine.health < 8f) {
+						usedHealing = healingReducedHardMode;
+					}
+					float newHealth = 0.1f * (float)Mathf.RoundToInt(10f * (eid.machine.health + usedHealing));
 					eid.machine.health = newHealth;
 					eid.health = newHealth;
 					healedList.Add(eid);
@@ -166,7 +168,11 @@ class IdolHealingExplosion : MonoBehaviour {
 					eid.statue = eid.GetComponent<Enemy>();
 				}
 				if (eid.statue) {
-					float newHealth =  0.1f * (float)Mathf.RoundToInt(10f * (eid.statue.health + healing));
+					float usedHealing = healing;
+					if (Util.IsHardMode() && eid.statue.health < 8f) {
+						usedHealing = healingReducedHardMode;
+					}
+					float newHealth =  0.1f * (float)Mathf.RoundToInt(10f * (eid.statue.health + usedHealing));
 					eid.statue.health = newHealth;
 					eid.health = newHealth;
 					healedList.Add(eid);

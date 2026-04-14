@@ -11,10 +11,10 @@ public class PuppetPatch {
 	[HarmonyPrefix]
 	[HarmonyPatch(typeof(Puppet), nameof(Puppet.Start))]
 	public static void Postfix(Puppet __instance) {
-		if (!Util.IsDifficulty(19)) {
+		if (!Util.IsDifficulty(19))
 			return;
-		}
-		__instance.gameObject.GetComponent<Animator>().speed = 1.5f;
-		__instance.gameObject.GetComponent<NavMeshAgent>().speed *= 1.5f;
+		float hardModeMult = (!Util.IsHardMode()) ? 1.5f : 2.25f;
+		__instance.GetComponent<Animator>().speed = hardModeMult;
+		__instance.GetComponent<NavMeshAgent>().speed *= hardModeMult;
 	}
 }
