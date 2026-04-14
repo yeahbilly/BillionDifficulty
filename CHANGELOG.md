@@ -1,4 +1,7 @@
-## Version 2.0.0 🎉 (2026-04-)
+## Version 2.0.1 (2026-04-14)
+- changelog fix
+
+## Version 2.0.0 🎉 (2026-04-14)
 - Added the Brilliant Billion mode
 - Fixed enemies using the Drone script not being able to attack
 - Fixed Sentries not shooting on other difficulties
