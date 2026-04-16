@@ -97,6 +97,7 @@ public class Plugin : BaseUnityPlugin {
 	]
 	public static ConfigToggle IsBrilliantBillion = new ConfigToggle(false);
 	public static bool StayedOnHardMode = false;
+	public const int BlueFilthRarity = 250;
 
 	private static readonly Harmony Harmony = new Harmony("billy.billiondifficulty");
 	internal static new ManualLogSource Logger;

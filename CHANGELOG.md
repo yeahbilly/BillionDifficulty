@@ -1,3 +1,12 @@
+## Version 2.1.0 (2026-04-16)
+- Probably fixed errors caused by Mirror Reaper hands
+- Fixed an error with Soldier attacks
+- Fixed the Very Cancerous Rodent not doing anything
+- Made blue Filth 1.2x more common
+- *Nerf*: Reduced the number of projectiles Malicious Faces shoot from 18 to 13
+- *Nerf*: Slightly increased the cooldown between the attacks of a Malicious Face
+- *Fix/buff?*: Fixed Filths, Strays, Schisms and Soldiers having the same movement and animation speed as on brutal
+
 ## Version 2.0.1 (2026-04-14)
 - changelog fix
 

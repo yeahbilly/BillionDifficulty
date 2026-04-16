@@ -14,9 +14,8 @@ public class GetProgressPatch {
 		int[] difficultyArray = {0, 1, 2, 3, 4, 5, 19};
 		int index = difficultyArray.IndexOf(difficulty);
 
-		if (index == -1) {
+		if (index == -1)
 			index = 0;
-		}
 
 		while (index < difficultyArray.Length) {
 			GameProgressData gameProgress = GameProgressSaver.GetGameProgress(difficultyArray[index]);
@@ -44,9 +43,8 @@ public class GetPrimePatch {
 		int[] difficultyArray = {0, 1, 2, 3, 4, 5, 19};
 		int index = difficultyArray.IndexOf(difficulty);
 
-		if (index == -1) {
+		if (index == -1)
 			index = 0;
-		}
 
 		while (index < difficultyArray.Length) {
 			GameProgressData gameProgress = GameProgressSaver.GetGameProgress(difficultyArray[index]);
@@ -73,9 +71,8 @@ public class GetEncoreProgressPatch {
 		int[] difficultyArray = {0, 1, 2, 3, 4, 5, 19};
 		int index = difficultyArray.IndexOf(difficulty);
 
-		if (index == -1) {
+		if (index == -1)
 			index = 0;
-		}
 
 		while (index < difficultyArray.Length) {
 			GameProgressData gameProgress = GameProgressSaver.GetGameProgress(difficultyArray[index]);

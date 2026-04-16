@@ -20,17 +20,14 @@ public class MaliciousFacePatch {
 		if (__instance.difficulty != 19)
 			return;
 		
-		float hardModeMult = (!Util.IsHardMode()) ? 1f : 1.1f;
-		__instance.coolDownMultiplier = 1.5f * hardModeMult; // Brutal: 1.25f
-		__instance.maxBurst = 18; // Brutal: 10
+		float hardModeMult = (!Util.IsHardMode()) ? 1f : 1.2f;
+		__instance.coolDownMultiplier = 1.4f * hardModeMult; // Brutal: 1.25f
+		__instance.maxBurst = 13; // Brutal: 10
 
 		if (!Util.IsHardMode())
 			return;
 
-		// int hammerIndex = Array.IndexOf(__instance.eid.weaknesses, "hammer");
-		// if (hammerIndex != -1) {
-		// 	__instance.eid.weaknessMultipliers[hammerIndex] = 0.6f; // default: 1.5f
-		// }
+		__instance.maxBurst = 18; // Brutal: 10
 		Plugin.SetEnemyWeakness("hammer", 0.6f, __instance.eid); // default: 1.5f
 	}
 
@@ -73,7 +70,6 @@ public class MaliciousFacePatch {
 			__instance.Invoke("StopWaiting", 1f);
 			UnityObject.Destroy(__instance.currentCE);
 		}
-
 		return false;
 	}
 
@@ -97,25 +93,11 @@ public class MaliciousFacePatch {
 		if (!Util.IsHardMode())
 			return true;
 
-		// if (LayerMaskDefaults.IsMatchingLayer(other.gameObject.layer, LMD.Environment)) {
-		// 	if (other.gameObject.CompareTag("Floor")) {
-		// 		GameObject shockwave = UnityObject.Instantiate<GameObject>(Plugin.Prefabs["PhysicalShockwave"], __instance.transform.position - __instance.transform.up, Quaternion.identity);
-		// 		PhysicalShockwave component = shockwave.GetComponent<PhysicalShockwave>();
-
-		// 		component.speed = 50f; //50f; // Brutal (cerberus): 75f
-		// 		component.damage = Mathf.RoundToInt(25f * __instance.eid.totalDamageModifier);
-		// 		component.maxSize = 75f; // default (cerberus): 100f
-		// 		component.enemy = true;
-		// 		component.enemyType = EnemyType.MaliciousFace;
-		// 	}
-		// }
-
 		if (other.gameObject.CompareTag("Moving")) {
 			__instance.BreakCorpse();
 			MonoSingleton<CameraController>.Instance.CameraShake(2f);
 			return false;
 		}
-
 		if (LayerMaskDefaults.IsMatchingLayer(other.gameObject.layer, LMD.Environment)) {
 			Breakable breakable;
 			if (other.gameObject.CompareTag("Floor")) {
@@ -296,7 +278,7 @@ public class MaliciousFacePatch {
 		if (Util.IsHardMode()) 
 			invokeTime = 0.02f;
 		else if (__instance.difficulty == 19)
-			invokeTime = 0.025f; // Brutal: 0.05f instead of 0.025f
+			invokeTime = 0.025f; // Brutal: 0.05f
 		else if (__instance.difficulty >= 4)
 			invokeTime = 0.05f;
 		else if (__instance.difficulty > 0)

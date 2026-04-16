@@ -26,9 +26,13 @@ public class CancerousRodentPatch {
 			return;
 
 		// the cooldown is 3 by default
-		if (!Util.IsHardMode())
-			__instance.coolDown -= 1f * Time.deltaTime;
-		else
-			__instance.coolDown -= 2f * Time.deltaTime;
+		if (__instance.coolDown != 0f) {
+			if (!Util.IsHardMode())
+				__instance.coolDown -= 1f * Time.deltaTime;
+			else
+				__instance.coolDown -= 2f * Time.deltaTime;
+		}
+		if (__instance.coolDown < 0f)
+			__instance.coolDown = 0f;
 	}
 }

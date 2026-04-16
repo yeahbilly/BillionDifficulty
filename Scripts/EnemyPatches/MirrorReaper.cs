@@ -5,6 +5,39 @@ using UnityObject = UnityEngine.Object;
 
 namespace BillionDifficulty.EnemyPatches;
 
+[HarmonyPatch(typeof(GroundWave), nameof(GroundWave.FixedUpdate))]
+public class GroundWavePatch {
+	public static bool Prefix(GroundWave __instance) {
+		if (__instance.difficulty != 19)
+			return true;
+		if (!__instance.isTraversingLink)
+			return false;
+
+		Vector3 vector = __instance.traversalVelocity * Time.fixedDeltaTime;
+		__instance.transform.position += vector;
+		if (__instance.traversalVelocity.sqrMagnitude > 0.001f) {
+			__instance.transform.rotation = Quaternion.LookRotation(__instance.traversalVelocity.normalized, Vector3.up);
+		}
+		if ((bool)__instance.rb) {
+			__instance.rb.position = __instance.transform.position;
+			__instance.rb.rotation = __instance.transform.rotation;
+		}
+		if (__instance.hasCrossed) {
+			__instance.postTeleportDistance += vector.magnitude;
+			if (__instance.postTeleportDistance >= 2f) {
+				__instance.isTraversingLink = false;
+				__instance.nma.enabled = true;
+				__instance.nma.Warp(__instance.transform.position);
+				__instance.nma.velocity = __instance.traversalVelocity;
+				if (__instance.nma != null && __instance.nma.enabled)
+					__instance.nma.SetDestination(__instance.target.GetNavPoint());
+			}
+		}
+		return false;
+	}
+}
+
+
 // !!! PATCHGROUP: MIRRORREAPER !!!
 [HarmonyPatch(typeof(MirrorReaper))]
 public class MirrorReaperPatch {

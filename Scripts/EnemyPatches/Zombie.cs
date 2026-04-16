@@ -12,22 +12,59 @@ namespace BillionDifficulty.EnemyPatches;
 [HarmonyPatch(typeof(Zombie))]
 public class ZombiePatch {
 	[HarmonyPostfix]
-	[HarmonyPatch(typeof(Zombie), nameof(Zombie.SetSpeed))]
-	public static void SetSpeedPostfix(Zombie __instance) {
+	[HarmonyPatch(typeof(ZombieMelee), nameof(ZombieMelee.Start))]
+	public static void ZombieMeleeStartPostfix(ZombieMelee __instance) {
 		if (__instance.difficulty != 19)
 			return;
 		if (__instance.eid.dead)
 			return;
 
-		float speedMultiplier = 0f;
-		float animSpeed = 0f;
-		float nmaSpeed = 0f;
-		float nmaAngularSpeed = 0f;
-		float nmaAcceleration = 0f;
+		float speedMultiplier = 1f;
+		float animSpeed = 1f;
+		float nmaSpeed = 1f;
+		float nmaAngularSpeed = 1f;
+		float nmaAcceleration = 1f;
+		
+		switch (__instance.eid.enemyType) {
+			case EnemyType.Filth:
+				if (!Util.IsHardMode()) {
+					speedMultiplier = 1.75f; // Brutal: 1.5f
+					animSpeed = 1.75f; // Brutal: 1.5f
+					nmaAngularSpeed = 9000f; // Brutal: 9000f
+					nmaAcceleration = 240f; // Brutal: 120f
+					nmaSpeed = 20f * speedMultiplier; // default: 10f * ...
+					break;
+				}
+				speedMultiplier = 2f; // Brutal: 1.5f
+				animSpeed = 2f; // Brutal: 1.5f
+				nmaAngularSpeed = 12000f; // Brutal: 9000f
+				nmaAcceleration = 400f; // Brutal: 120f
+				nmaSpeed = 20f * speedMultiplier; // default: 10f * ...
+				break;
+		}
+
+		__instance.anim.speed = animSpeed * __instance.eid.totalSpeedModifier;
+		__instance.nma.speed = nmaSpeed * __instance.eid.totalSpeedModifier;
+		__instance.nma.angularSpeed = nmaAngularSpeed * __instance.eid.totalSpeedModifier;
+		__instance.nma.acceleration = nmaAcceleration * __instance.eid.totalSpeedModifier;
+	}
+
+	[HarmonyPostfix]
+	[HarmonyPatch(typeof(ZombieProjectiles), nameof(ZombieProjectiles.Start))]
+	public static void ZombieProjectilesStartPostfix(ZombieProjectiles __instance) {
+		if (__instance.difficulty != 19)
+			return;
+		if (__instance.eid.dead)
+			return;
+
+		float speedMultiplier = 1f;
+		float animSpeed = 1f;
+		float nmaSpeed = 1f;
+		float nmaAngularSpeed = 1f;
+		float nmaAcceleration = 1f;
 		
 		switch (__instance.eid.enemyType) {
 			case EnemyType.Stray:
-			case EnemyType.Schism:
 				if (!Util.IsHardMode()) {
 					speedMultiplier = 1.75f; // Brutal: 1.5f
 					animSpeed = 1.75f; // Brutal: 1.5f
@@ -42,50 +79,51 @@ public class ZombiePatch {
 				nmaAngularSpeed = 1600f; // Brutal: 800f
 				nmaAcceleration = 80f; // Brutal: 30f
 				break;
+			case EnemyType.Schism:
+				if (!Util.IsHardMode()) {
+					speedMultiplier = 1.75f; // Brutal: 1.5f
+					animSpeed = 1.5f; // Brutal: 1.5f
+					nmaSpeed = 12.5f * speedMultiplier; // default: 10f * ...
+					nmaAngularSpeed = 800f; // Brutal: 800f
+					nmaAcceleration = 50f; // Brutal: 30f
+					break;
+				}
+				speedMultiplier = 2f; // Brutal: 1.5f
+				animSpeed = 1.5f; // Brutal: 1.5f
+				nmaSpeed = 17.5f * speedMultiplier; // default: 10f * ...
+				nmaAngularSpeed = 1600f; // Brutal: 800f
+				nmaAcceleration = 80f; // Brutal: 30f
+				break;
 			case EnemyType.Soldier:
 				float runSpeed;
 				if (!Util.IsHardMode()) {
 					speedMultiplier = 1.75f; // Brutal: 1.5f
-					animSpeed = 1.25f; // Brutal: 1f
+					animSpeed = 1.2f; // Brutal: 1f
 					nmaAngularSpeed = 480f; // Brutal: 480f
 					nmaAcceleration = 480f; // Brutal: 480f
-					runSpeed = 1.5f * speedMultiplier; // Brutal: 1f * ...
+					runSpeed = 1.2f * speedMultiplier; // Brutal: 1f * ...
 					__instance.anim.SetFloat("RunSpeed", runSpeed);
-					nmaSpeed = 17.5f * speedMultiplier; // Brutal: 17.5f * ...
+					nmaSpeed = 20f * speedMultiplier; // Brutal: 17.5f * ...
 					break;
 				}
 				speedMultiplier = 2f; // Brutal: 1.5f
-				animSpeed = 1.5f; // Brutal: 1f
+				animSpeed = 1.35f; // Brutal: 1f
 				nmaAngularSpeed = 600f; // Brutal: 480f
 				nmaAcceleration = 560f; // Brutal: 480f
-				runSpeed = 1.5f * speedMultiplier; // Brutal: 1f * ...
+				runSpeed = 1.35f * speedMultiplier; // Brutal: 1f * ...
 				__instance.anim.SetFloat("RunSpeed", runSpeed);
-				nmaSpeed = 20f * speedMultiplier; // Brutal: 17.5f * ...
-				break;
-			case EnemyType.Filth:
-				if (!Util.IsHardMode()) {
-					speedMultiplier = 1.75f; // Brutal: 1.5f
-					animSpeed = 2.25f; // Brutal: 1.5f
-					nmaAngularSpeed = 9000f; // Brutal: 9000f
-					nmaAcceleration = 240f; // Brutal: 120f
-					nmaSpeed = 20f * speedMultiplier; // default: 10f * ...
-					break;
-				}
-				speedMultiplier = 2f; // Brutal: 1.5f
-				animSpeed = 2.5f; // Brutal: 1.5f
-				nmaAngularSpeed = 12000f; // Brutal: 9000f
-				nmaAcceleration = 400f; // Brutal: 120f
-				nmaSpeed = 20f * speedMultiplier; // default: 10f * ...
+				nmaSpeed = 24f * speedMultiplier; // Brutal: 17.5f * ...
 				break;
 		}
 
-		__instance.speedMultiplier = speedMultiplier;
 		__instance.anim.speed = animSpeed * __instance.eid.totalSpeedModifier;
 		__instance.nma.speed = nmaSpeed * __instance.eid.totalSpeedModifier;
 		__instance.nma.angularSpeed = nmaAngularSpeed * __instance.eid.totalSpeedModifier;
 		__instance.nma.acceleration = nmaAcceleration * __instance.eid.totalSpeedModifier;
 	}
 }
+
+
 // ZombieProjectiles
 [HarmonyPatch(typeof(ZombieProjectiles))]
 public class ZombieProjectilesPatch {
@@ -168,9 +206,8 @@ public class ZombieProjectilesPatch {
 	public static void ThrowProjectilePostfix(ZombieProjectiles __instance, bool __runOriginal) {
 		if (__instance.difficulty != 19 || !__runOriginal)
 			return;
-		
-		Projectile proj = __instance.currentProjectile.GetComponent<Projectile>();
 
+		Projectile proj = __instance.currentProjectile.GetComponent<Projectile>();
 		if (__instance.eid.enemyType == EnemyType.Stray) {
 			__instance.coolDownReduce = __instance.coolDown;
 
@@ -195,6 +232,7 @@ public class ZombieProjectilesPatch {
 
 		if (__instance.eid.enemyType != EnemyType.Soldier)
 			return;
+		proj = __instance.currentProjectile.GetComponentInChildren<Projectile>();
 
 		__instance.coolDownReduce = 2f; // Brutal: 1f
 		if (Util.IsHardMode())
@@ -367,6 +405,7 @@ public class ContinuousBeamPatch {
 // 		return true;
 // 	}
 // }
+
 
 // ZombieMelee
 [HarmonyPatch(typeof(ZombieMelee))]

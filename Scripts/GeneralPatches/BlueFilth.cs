@@ -8,7 +8,10 @@ namespace BillionDifficulty.GenaralPatches;
 [HarmonyPatch(typeof(ZombieMelee), nameof(ZombieMelee.Start))]
 public class BlueFilthPatch {
 	public static void Postfix(ZombieMelee __instance) {
-		bool gotBlueFilth = __instance.difficulty == 19 && __instance.eid.enemyType == EnemyType.Filth && UnityEngine.Random.Range(0, 300) == 0;
+		if (__instance.difficulty != 19)
+			return;
+		
+		bool gotBlueFilth = __instance.eid.enemyType == EnemyType.Filth && Random.Range(0, Plugin.BlueFilthRarity) == 0;
 		if (!gotBlueFilth)
 			return;
 

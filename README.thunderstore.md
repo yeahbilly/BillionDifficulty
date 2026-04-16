@@ -171,7 +171,7 @@ Shoots out a big mannequin projectile every other attack and has a shorter attac
 <summary>Malicious face</summary>
 Beam count is increased by 1. Shoots more projectiles in a cool spiral pattern with a bigger one in the middle that deals 40 damage, while the others do 20 (the friendly fire from projectiles is reduced to account for how many there are). Parrying the explosive beam attack does 0.5x of the original damage to the Malicious face itself and also damages and knocks you back dealing 25 damage (can be avoided by dashing or moving fast)
 
-<b>BB</b>: they create a damaging shockwave when falling onto the ground, their projectiles do 0% friendly fire, and damage from hammers is reduced
+<b>BB</b>: they create a damaging shockwave when falling onto the ground, their projectiles do 0% friendly fire, and they take reduced damage from hammers
 </details>
 
 <details>
