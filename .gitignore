@@ -1,4 +1,3 @@
-.hidden/
 lib/*
 !lib/Configgy.dll
 assets/old/
