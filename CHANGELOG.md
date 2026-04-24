@@ -1,3 +1,6 @@
+## Version 2.1.1 (2026-04-24)
+- Fixed the Mirror Reaper only having the new projectile on Brilliant Billion
+
 # Version 2.1.0 (2026-04-16)
 - Probably fixed errors caused by Mirror Reaper hands
 - Fixed an error with Soldier attacks

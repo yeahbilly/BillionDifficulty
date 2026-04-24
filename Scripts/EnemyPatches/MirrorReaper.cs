@@ -7,10 +7,10 @@ namespace BillionDifficulty.EnemyPatches;
 
 [HarmonyPatch(typeof(GroundWave), nameof(GroundWave.FixedUpdate))]
 public class GroundWavePatch {
-	public static bool Prefix(GroundWave __instance) {
+	public static bool Prefix(GroundWave __instance, bool __runOriginal) {
 		if (__instance.difficulty != 19)
 			return true;
-		if (!__instance.isTraversingLink)
+		if (!__instance.isTraversingLink || !__runOriginal)
 			return false;
 
 		Vector3 vector = __instance.traversalVelocity * Time.fixedDeltaTime;
@@ -52,15 +52,6 @@ public class MirrorReaperPatch {
 		__instance.maxGroundWaves = (!Util.IsHardMode()) ? 3 : 4; // Brutal: 3
 	}
 
-	// MIRROR REAPER PATCH (setup)
-	[HarmonyPostfix]
-	[HarmonyPatch(typeof(MirrorReaper), nameof(MirrorReaper.Start))]
-	public static void StartPostfix(MirrorReaper __instance) {
-		if (!Util.IsHardMode())
-			return;
-		// __instance.gameObject.AddComponent<MirrorReaperMortar>();
-	}
-
 	// MIRROR REAPER PATCH (cooldown)
 	[HarmonyPostfix]
 	[HarmonyPatch(typeof(MirrorReaper), nameof(MirrorReaper.AttackCheck))]
@@ -75,7 +66,7 @@ public class MirrorReaperPatch {
 	[HarmonyPostfix]
 	[HarmonyPatch(typeof(MirrorReaper), nameof(MirrorReaper.SpawnGroundWave))]
 	public static void SpawnGroundWavePostfix(MirrorReaper __instance) {
-		if (!Util.IsHardMode())
+		if (__instance.difficulty != 19)
 			return;
 		// MirrorReaperMortar mortar = __instance.GetComponent<MirrorReaperMortar>();
 		// if (mortar != null && !mortar.canShootMortar)
