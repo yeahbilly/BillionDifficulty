@@ -27,11 +27,8 @@ class IdolHealingSetup : MonoBehaviour {
 	public void Update() {
 		if (stop)
 			return;
-
-
 		if (BlindEnemies.Blind)
 			return;
-
 
 		cooldown += Time.deltaTime;
 		if (cooldown < cooldownMax)
@@ -59,8 +56,7 @@ class IdolHealingSetup : MonoBehaviour {
 			renderer.material.color = new Color(0, 1, 0);
 		}
 
-		explosionComp.gameObject.AddComponent<EnemyIdentifierSaver>().eid = this.eid;
-
+		explosionComp.gameObject.AddComponent<EnemyIdentifierSaver>().eid = eid;
 		explosion.GetComponentInChildren<AudioSource>().enabled = false;
 
 		foreach (RemoveOnTime remove in explosion.GetComponentsInChildren<RemoveOnTime>()) {
@@ -86,7 +82,6 @@ class IdolHealingExplosion : MonoBehaviour {
 		GameObject enemy = other.gameObject;
 		if (enemy.layer != 10 && enemy.layer != 11)
 			return;
-
 
 		EnemyIdentifierIdentifier eidid = other.GetComponent<EnemyIdentifierIdentifier>();
 		bool notDead = eidid && eidid.eid && !eidid.eid.dead;
