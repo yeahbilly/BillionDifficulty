@@ -11,7 +11,7 @@ namespace BillionDifficulty.SetupPatches;
 public class GetProgressPatch {
 	public static bool Prefix(int difficulty, ref int __result) {
 		int num = 1;
-		int[] difficultyArray = {0, 1, 2, 3, 4, 5, 19};
+		int[] difficultyArray = [0, 1, 2, 3, 4, 5, 19];
 		int index = difficultyArray.IndexOf(difficulty);
 
 		if (index == -1)
@@ -40,7 +40,7 @@ public class GetPrimePatch {
 
 		level--;
 		int num = 0;
-		int[] difficultyArray = {0, 1, 2, 3, 4, 5, 19};
+		int[] difficultyArray = [0, 1, 2, 3, 4, 5, 19];
 		int index = difficultyArray.IndexOf(difficulty);
 
 		if (index == -1)
@@ -68,7 +68,7 @@ public class GetPrimePatch {
 public class GetEncoreProgressPatch {
 	public static bool Prefix(int difficulty, ref int __result) {
 		int num = 0;
-		int[] difficultyArray = {0, 1, 2, 3, 4, 5, 19};
+		int[] difficultyArray = [0, 1, 2, 3, 4, 5, 19];
 		int index = difficultyArray.IndexOf(difficulty);
 
 		if (index == -1)
@@ -169,16 +169,16 @@ public class RankDataConstructorPatch {
 		RankData rank = GameProgressSaver.GetRank(true, -1);
 		if (rank != null) {
 			__instance.ranks = rank.ranks;
-			if (rank.majorAssists != null) {
+			if (rank.majorAssists != null)
 				__instance.majorAssists = rank.majorAssists;
-			} else {
+			else
 				__instance.majorAssists = new bool[20];
-			}
-			if (rank.stats != null) {
+			
+			if (rank.stats != null)
 				__instance.stats = rank.stats;
-			} else {
+			else
 				__instance.stats = new RankScoreData[20];
-			}
+			
 			if ((sman.rankScore >= rank.ranks[@int] && (rank.majorAssists == null || (!sman.majorUsed && rank.majorAssists[@int]))) || sman.rankScore > rank.ranks[@int] || rank.levelNumber != __instance.levelNumber) {
 				__instance.majorAssists[@int] = sman.majorUsed;
 				__instance.ranks[@int] = sman.rankScore;
@@ -193,9 +193,8 @@ public class RankDataConstructorPatch {
 			__instance.secretsFound = new bool[__instance.secretsAmount];
 			int num = 0;
 			while (num < __instance.secretsAmount && num < rank.secretsFound.Length) {
-				if (sman.secretObjects[num] == null || rank.secretsFound[num]) {
+				if (sman.secretObjects[num] == null || rank.secretsFound[num])
 					__instance.secretsFound[num] = true;
-				}
 				num++;
 			}
 			__instance.challenge = rank.challenge;
@@ -203,13 +202,11 @@ public class RankDataConstructorPatch {
 		}
 		__instance.ranks = new int[20];
 		__instance.stats = new RankScoreData[20];
-		if (__instance.stats[@int] == null) {
+		if (__instance.stats[@int] == null)
 			__instance.stats[@int] = new RankScoreData();
-		}
 		__instance.majorAssists = new bool[20];
-		for (int i = 0; i < __instance.ranks.Length; i++) {
+		for (int i = 0; i < __instance.ranks.Length; i++)
 			__instance.ranks[i] = -1;
-		}
 		__instance.ranks[@int] = sman.rankScore;
 		__instance.majorAssists[@int] = sman.majorUsed;
 		__instance.stats[@int].kills = sman.kills;
@@ -218,9 +215,8 @@ public class RankDataConstructorPatch {
 		__instance.secretsAmount = sman.secretObjects.Length;
 		__instance.secretsFound = new bool[__instance.secretsAmount];
 		for (int j = 0; j < __instance.secretsAmount; j++) {
-			if (sman.secretObjects[j] == null) {
+			if (sman.secretObjects[j] == null)
 				__instance.secretsFound[j] = true;
-			}
 		}
 		return false;
 	}
