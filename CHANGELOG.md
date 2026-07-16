@@ -1,3 +1,6 @@
+## Version 2.1.2 (2026-07-16)
+- Made Swordsmachine Tundra on Brilliant Billion take 60% of the damage instead of 25% since it never enrages
+
 ## Version 2.1.1 (2026-04-24)
 - Fixed the Mirror Reaper only having the new projectile on Brilliant Billion
 

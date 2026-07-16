@@ -113,7 +113,7 @@ Attack range is increased, and they can now shoot straight up
 <summary>Swordsmachine</summary>
 Every other shotgun attack while you're in a certain range, the swordsmachine will overpump its shotgun creating a big explosion. Phase 2 now starts at 10/30 hp instead of 15/30 hp
 
-<b>BB</b>: takes only 25% while not enraged. Spawns Minotaur goop when downed
+<b>BB</b>: takes only 25% damage while not enraged. Spawns Minotaur goop when downed
 </details>
 
 <details>

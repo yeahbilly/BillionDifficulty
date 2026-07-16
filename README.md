@@ -1,7 +1,7 @@
 # Billion Difficulty
-![version 2.1.1](https://img.shields.io/badge/version-2.1.1-blue) [![Thunderstore page](https://img.shields.io/badge/Thunderstore%20page-gray?logo=thunderstore)](https://thunderstore.io/c/ultrakill/p/BillyMod/BillionDifficulty/)
+![version 2.1.2](https://img.shields.io/badge/version-2.1.2-blue) [![Thunderstore page](https://img.shields.io/badge/Thunderstore%20page-gray?logo=thunderstore)](https://thunderstore.io/c/ultrakill/p/BillyMod/BillionDifficulty/)
 
-Custom difficulty mod for ULTRAKILL (which is currently in early access), last updated for patch 17d2
+Custom difficulty mod for ULTRAKILL (which is currently in early access), updated for the latest version as of 2026-07-16
 
 ## boring stuff
 These .dll files were omitted from the /lib/ folder, you can get them from /ULTRAKILL/ULTRAKILL_Data/Managed:

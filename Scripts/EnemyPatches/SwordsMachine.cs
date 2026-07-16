@@ -197,6 +197,11 @@ public class SwordsMachinePatch {
 			return;
 		if (__instance.EID.enemyType != EnemyType.Swordsmachine || __instance.sm?.isEnraged == true)
 			return;
+		// for tundra
+		if (__instance.sm.bothPhases) {
+			multiplier *= 0.6f;
+			return;
+		}
 		multiplier *= 0.25f;
 	}
 }
